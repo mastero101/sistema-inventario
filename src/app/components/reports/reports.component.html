@@ -1,0 +1,337 @@
+<div class="p-4 sm:p-6">
+  <!-- Encabezado -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-slate-800">Reportes y Estadísticas</h1>
+    <p class="text-sm text-slate-500">Gestión y análisis del inventario</p>
+  </div>
+
+  <!-- Lista de Reportes con Filtros Integrados -->
+  <div class="bg-white rounded-lg shadow-sm border border-slate-200">
+    <!-- Encabezado y Filtros -->
+    <div class="p-4 border-b border-slate-200">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-slate-800">Reportes Generados</h3>
+        <button 
+          (click)="generateReport()"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center">
+          <i class="fas fa-file-export mr-2"></i>
+          Generar Nuevo Reporte
+        </button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Tipo de Reporte -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">
+            Tipo de Reporte
+          </label>
+          <select 
+            [(ngModel)]="filterCriteria.tipo"
+            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Todos</option>
+            <option value="Reporte General">Reporte General</option>
+            <option value="Por Departamento">Por Departamento</option>
+            <option value="Por Estado">Por Estado</option>
+            <option value="Por Tipo de Equipo">Por Tipo de Equipo</option>
+          </select>
+        </div>
+
+        <!-- Estado -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">
+            Estado
+          </label>
+          <select 
+            [(ngModel)]="filterCriteria.estado"
+            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Todos</option>
+            <option value="Generado">Generado</option>
+            <option value="En Proceso">En Proceso</option>
+            <option value="Error">Error</option>
+          </select>
+        </div>
+
+        <!-- Fechas -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">
+            Fecha Inicio
+          </label>
+          <input 
+            type="date"
+            [(ngModel)]="filterCriteria.fechaInicio"
+            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">
+            Fecha Fin
+          </label>
+          <input 
+            type="date"
+            [(ngModel)]="filterCriteria.fechaFin"
+            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de Reportes -->
+    <div class="overflow-x-auto -mx-4 sm:mx-0">
+      <div class="inline-block min-w-full align-middle">
+        <div class="overflow-hidden">
+          <!-- Tabla para escritorio -->
+          <table class="hidden md:table w-full text-sm text-left">
+            <thead class="bg-slate-50 text-slate-600">
+              <tr>
+                <th class="px-4 py-3 font-medium">ID</th>
+                <th class="px-4 py-3 font-medium">Tipo</th>
+                <th class="px-4 py-3 font-medium">Fecha Generación</th>
+                <th class="px-4 py-3 font-medium">Periodo</th>
+                <th class="px-4 py-3 font-medium">Estado</th>
+                <th class="px-4 py-3 font-medium">Formato</th>
+                <th class="px-4 py-3 font-medium">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              <tr *ngFor="let report of paginatedReports" 
+                  class="hover:bg-slate-50">
+                <td class="px-4 py-3 text-slate-600">{{report.id}}</td>
+                <td class="px-4 py-3">
+                  <div>
+                    <p class="font-medium text-slate-800">{{report.tipo}}</p>
+                    <p class="text-xs text-slate-500">Por: {{report.generadoPor}}</p>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-slate-600">{{report.fechaGeneracion}}</td>
+                <td class="px-4 py-3 text-slate-600">
+                  {{report.periodo.inicio}} - {{report.periodo.fin}}
+                </td>
+                <td class="px-4 py-3">
+                  <span [ngClass]="{
+                    'bg-green-100 text-green-800': report.estado === 'Generado',
+                    'bg-yellow-100 text-yellow-800': report.estado === 'En Proceso',
+                    'bg-red-100 text-red-800': report.estado === 'Error'
+                  }" class="px-2 py-1 rounded-full text-xs font-medium">
+                    {{report.estado}}
+                  </span>
+                </td>
+                <td class="px-4 py-3">
+                  <span [ngClass]="{
+                    'bg-blue-100 text-blue-800': report.formatoArchivo === 'PDF',
+                    'bg-emerald-100 text-emerald-800': report.formatoArchivo === 'Excel'
+                  }" class="px-2 py-1 rounded-full text-xs font-medium">
+                    {{report.formatoArchivo}}
+                  </span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex space-x-2">
+                    <button 
+                      class="text-blue-600 hover:text-blue-800" 
+                      title="Descargar"
+                      (click)="downloadReport(report)">
+                      <i class="fas fa-download"></i>
+                    </button>
+                    <button 
+                      class="text-slate-600 hover:text-slate-800" 
+                      title="Ver Detalles"
+                      (click)="viewReportDetails(report)">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button 
+                      class="text-red-600 hover:text-red-800" 
+                      title="Eliminar"
+                      (click)="deleteReport(report)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Vista de tarjetas para móvil -->
+          <div class="md:hidden space-y-3">
+            <div *ngFor="let report of paginatedReports" 
+                 class="bg-white p-4 space-y-3 border-b border-slate-200">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="text-xs text-slate-500">ID: {{report.id}}</span>
+                  <h4 class="font-medium text-slate-800">{{report.tipo}}</h4>
+                  <p class="text-xs text-slate-500">Por: {{report.generadoPor}}</p>
+                </div>
+                <span [ngClass]="{
+                  'bg-green-100 text-green-800': report.estado === 'Generado',
+                  'bg-yellow-100 text-yellow-800': report.estado === 'En Proceso',
+                  'bg-red-100 text-red-800': report.estado === 'Error'
+                }" class="px-2 py-1 rounded-full text-xs font-medium">
+                  {{report.estado}}
+                </span>
+              </div>
+
+              <div class="text-sm">
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <p class="text-slate-500">Fecha:</p>
+                    <p class="font-medium">{{report.fechaGeneracion}}</p>
+                  </div>
+                  <div>
+                    <p class="text-slate-500">Formato:</p>
+                    <span [ngClass]="{
+                      'bg-blue-100 text-blue-800': report.formatoArchivo === 'PDF',
+                      'bg-emerald-100 text-emerald-800': report.formatoArchivo === 'Excel'
+                    }" class="px-2 py-1 rounded-full text-xs font-medium">
+                      {{report.formatoArchivo}}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex justify-end space-x-2 pt-2">
+                <button 
+                  class="text-blue-600 hover:text-blue-800 p-2" 
+                  title="Descargar"
+                  (click)="downloadReport(report)">
+                  <i class="fas fa-download"></i>
+                </button>
+                <button 
+                  class="text-slate-600 hover:text-slate-800 p-2" 
+                  title="Ver Detalles"
+                  (click)="viewReportDetails(report)">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button 
+                  class="text-red-600 hover:text-red-800 p-2" 
+                  title="Eliminar"
+                  (click)="deleteReport(report)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paginación -->
+    <div class="p-4 border-t border-slate-200">
+      <div class="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
+        <div class="text-sm text-slate-500 text-center sm:text-left">
+          Mostrando {{startIndex + 1}} - {{endIndex}} de {{filteredReports.length}} reportes
+        </div>
+        <div class="flex space-x-2">
+          <button 
+            (click)="previousPage()"
+            [disabled]="currentPage === 1"
+            class="px-3 py-1 border rounded-lg hover:bg-slate-50 disabled:opacity-50">
+            Anterior
+          </button>
+          <button 
+            (click)="nextPage()"
+            [disabled]="currentPage >= totalPages"
+            class="px-3 py-1 border rounded-lg hover:bg-slate-50 disabled:opacity-50">
+            Siguiente
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalles -->
+<div *ngIf="selectedReport" 
+     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <!-- Encabezado Modal -->
+    <div class="sticky top-0 bg-white flex justify-between items-center p-4 border-b border-slate-200">
+      <div>
+        <h3 class="text-lg font-semibold text-slate-800">
+          Detalles del Reporte
+        </h3>
+        <p class="text-sm text-slate-500">ID: {{selectedReport.id}}</p>
+      </div>
+      <button 
+        (click)="closeReportDetails()"
+        class="p-2 text-slate-400 hover:text-slate-600">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Contenido Modal -->
+    <div class="p-4 space-y-4">
+      <!-- Información General -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm font-medium text-slate-600">Tipo de Reporte</p>
+          <p class="text-base text-slate-800">{{selectedReport.tipo}}</p>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-slate-600">Estado</p>
+          <span [ngClass]="{
+            'bg-green-100 text-green-800': selectedReport.estado === 'Generado',
+            'bg-yellow-100 text-yellow-800': selectedReport.estado === 'En Proceso',
+            'bg-red-100 text-red-800': selectedReport.estado === 'Error'
+          }" class="px-2 py-1 rounded-full text-xs font-medium inline-block mt-1">
+            {{selectedReport.estado}}
+          </span>
+        </div>
+      </div>
+
+      <!-- Fechas -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm font-medium text-slate-600">Fecha de Generación</p>
+          <p class="text-base text-slate-800">{{selectedReport.fechaGeneracion}}</p>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-slate-600">Formato</p>
+          <span [ngClass]="{
+            'bg-blue-100 text-blue-800': selectedReport.formatoArchivo === 'PDF',
+            'bg-emerald-100 text-emerald-800': selectedReport.formatoArchivo === 'Excel'
+          }" class="px-2 py-1 rounded-full text-xs font-medium inline-block mt-1">
+            {{selectedReport.formatoArchivo}}
+          </span>
+        </div>
+      </div>
+
+      <!-- Periodo -->
+      <div>
+        <p class="text-sm font-medium text-slate-600">Periodo del Reporte</p>
+        <div class="mt-1 flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+          <div class="bg-slate-100 px-3 py-2 rounded-lg text-sm w-full sm:w-auto">
+            <i class="fas fa-calendar-alt mr-2 text-slate-400"></i>
+            {{selectedReport.periodo.inicio}}
+          </div>
+          <span class="text-slate-400 hidden sm:block">hasta</span>
+          <div class="bg-slate-100 px-3 py-2 rounded-lg text-sm w-full sm:w-auto">
+            <i class="fas fa-calendar-alt mr-2 text-slate-400"></i>
+            {{selectedReport.periodo.fin}}
+          </div>
+        </div>
+      </div>
+
+      <!-- Información Adicional -->
+      <div class="bg-slate-50 p-4 rounded-lg">
+        <div class="flex items-center space-x-2 text-sm text-slate-600">
+          <i class="fas fa-user text-slate-400"></i>
+          <span>Generado por:</span>
+          <span class="font-medium">{{selectedReport.generadoPor}}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie del Modal -->
+    <div class="sticky bottom-0 bg-white flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 p-4 border-t border-slate-200">
+      <button 
+        (click)="downloadReport(selectedReport)"
+        class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center">
+        <i class="fas fa-download mr-2"></i>
+        Descargar
+      </button>
+      <button 
+        (click)="closeReportDetails()"
+        class="w-full sm:w-auto px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>

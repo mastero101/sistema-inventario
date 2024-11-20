@@ -1,0 +1,65 @@
+<header class="bg-white border-b border-slate-200 shadow-sm fixed top-0 right-0 left-0 z-10">
+  <div class="px-4 sm:px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <i class="fas fa-laptop text-slate-700 text-xl sm:text-2xl"></i>
+      <h1 class="text-lg sm:text-xl font-bold text-slate-700 hidden sm:block">Sistema Inventario TI</h1>
+    </div>
+
+    <div class="relative">
+      <button class="flex items-center space-x-2" (click)="toggleUserMenu()">
+        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-100 flex items-center justify-center">
+          <i class="fas fa-user text-slate-600"></i>
+        </div>
+        <div class="hidden sm:block">
+          <p class="text-sm font-medium text-slate-700">Admin</p>
+          <p class="text-xs text-slate-500">Administrador</p>
+        </div>
+        <i class="fas fa-chevron-down text-slate-400 hidden sm:block"></i>
+      </button>
+
+      <!-- Menú desplegable -->
+      <div *ngIf="isUserMenuOpen" 
+           class="absolute right-0 top-full mt-2 w-48 sm:w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+        <div class="py-1" *ngIf="isLoggedIn; else loginRegisterTemplate">
+          <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+            <i class="fas fa-user-circle mr-2"></i>Mi Perfil
+          </a>
+          <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+            <i class="fas fa-cog mr-2"></i>Configuración
+          </a>
+          <div class="border-t border-slate-200"></div>
+          <a href="#" (click)="logout()" class="block px-4 py-2 text-sm text-red-600 hover:bg-slate-100">
+            <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
+          </a>
+        </div>
+        <ng-template #loginRegisterTemplate>
+          <app-login></app-login>
+          <a href="#" class="block px-4 py-2 text-sm text-blue-600 hover:bg-blue-700 text-center">
+            Registrarse
+          </a>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Modal de búsqueda para móvil -->
+<div *ngIf="isSearchOpen" 
+     class="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden">
+  <div class="bg-white p-4 absolute top-0 left-0 right-0">
+    <div class="relative">
+      <input 
+        type="text" 
+        placeholder="Buscar..."
+        class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        #searchInput
+      >
+      <button class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" (click)="toggleSearch()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Espaciador para compensar el header fijo -->
+<div class="h-[3.5rem] sm:h-[4.5rem]"></div>

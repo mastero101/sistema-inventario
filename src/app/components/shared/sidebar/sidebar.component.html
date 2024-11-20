@@ -1,0 +1,89 @@
+<aside [ngClass]="{'w-64': !isCollapsed, 'w-16': isCollapsed}" 
+       class="bg-slate-800 min-h-full shadow-lg transition-all duration-300">
+  
+  <!-- Header del sidebar con el botón -->
+  <div class="flex items-center justify-between p-4 border-b border-slate-700">
+    <!-- Título/Logo (visible solo cuando no está colapsado) -->
+    <h2 [ngClass]="{'hidden': isCollapsed}" class="text-white text-lg font-semibold">Sistema Inventario</h2>
+    
+    <!-- Botón para colapsar -->
+    <button (click)="toggleSidebar()" 
+            class="text-slate-300 p-2 rounded-lg hover:bg-slate-700 hover:text-white transition-colors">
+      <i [class]="isCollapsed ? 'fas fa-bars' : 'fas fa-times'" class="text-lg"></i>
+    </button>
+  </div>
+
+  <nav class="p-4">
+    <ul class="space-y-2">
+      <!-- Dashboard -->
+      <li>
+        <a routerLink="/dashboard" 
+           routerLinkActive="bg-slate-700 text-white"
+           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200">
+          <i class="fas fa-chart-line w-6"></i>
+          <span [ngClass]="{'hidden': isCollapsed}">Dashboard</span>
+        </a>
+      </li>
+
+      <!-- Equipos -->
+      <li>
+        <a routerLink="/equipos" 
+           routerLinkActive="bg-slate-700 text-white"
+           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200">
+          <i class="fas fa-desktop w-6"></i>
+          <span [ngClass]="{'hidden': isCollapsed}">Equipos</span>
+        </a>
+      </li>
+
+      <!-- Inventario -->
+      <li>
+        <a routerLink="/inventory" 
+           routerLinkActive="bg-slate-700 text-white"
+           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200">
+          <i class="fas fa-boxes w-6"></i>
+          <span [ngClass]="{'hidden': isCollapsed}">Inventario</span>
+        </a>
+      </li>
+
+      <!-- Mantenimiento -->
+      <li>
+        <a routerLink="/mantenimiento" 
+           routerLinkActive="bg-slate-700 text-white"
+           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200">
+          <i class="fas fa-tools w-6"></i>
+          <span [ngClass]="{'hidden': isCollapsed}">Mantenimiento</span>
+        </a>
+      </li>
+
+      <!-- Usuarios -->
+      <li>
+        <a routerLink="/usuarios" 
+           routerLinkActive="bg-slate-700 text-white"
+           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200">
+          <i class="fas fa-users w-6"></i>
+          <span [ngClass]="{'hidden': isCollapsed}">Usuarios</span>
+        </a>
+      </li>
+
+      <!-- Reportes -->
+      <li>
+        <a routerLink="/reports" 
+           routerLinkActive="bg-slate-700 text-white"
+           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200">
+          <i class="fas fa-file-alt w-6"></i>
+          <span [ngClass]="{'hidden': isCollapsed}">Reportes</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Configuración -->
+    <div class="mt-6 pt-6 border-t border-slate-700">
+      <a routerLink="/configuracion"
+         routerLinkActive="bg-slate-700 text-white"
+         class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200">
+        <i class="fas fa-cog w-6"></i>
+        <span [ngClass]="{'hidden': isCollapsed}">Configuración</span>
+      </a>
+    </div>
+  </nav>
+</aside>
