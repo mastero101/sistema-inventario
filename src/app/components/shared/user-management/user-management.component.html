@@ -1,0 +1,54 @@
+<div class="p-4">
+    <h2 class="text-lg font-bold mb-4">Gestión de Usuarios</h2>
+
+    <!-- Formulario para agregar un nuevo usuario -->
+    <div class="mb-4">
+        <input [(ngModel)]="newUserName" placeholder="Nombre" class="border border-gray-300 rounded p-2 w-1/4 mr-2" />
+        <input [(ngModel)]="newUserPassword" type="password" placeholder="Contraseña" class="border border-gray-300 rounded p-2 w-1/4 mr-2" />
+        <button (click)="addUser()" class="bg-green-500 text-white rounded px-6 py-2 hover:bg-green-600 transition">Agregar Usuario</button>
+    </div>
+
+    <table class="min-w-full border border-gray-300">
+        <thead>
+            <tr class="bg-gray-200">
+                <th class="border border-gray-300 px-4 py-2">ID</th>
+                <th class="border border-gray-300 px-4 py-2">Nombre</th>
+                <th class="border border-gray-300 px-4 py-2">Contraseña</th>
+                <th class="border border-gray-300 px-4 py-2">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let user of users" class="hover:bg-gray-100">
+                <td class="border border-gray-300 px-4 py-2">{{ user.id }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ user.name }}</td>
+                <td class="border border-gray-300 px-4 py-2 flex items-center">
+                    <span *ngIf="!user.showPassword">{{ user.password | slice:0:0 }}*******</span>
+                    <span *ngIf="user.showPassword">{{ user.password }}</span>
+                    <button (click)="toggleUserPasswordVisibility(user)" class="ml-2 text-gray-500">
+                        <i class="fas" [ngClass]="user.showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                    </button>
+                </td>
+                <td class="border border-gray-300 px-4 py-2">
+                    <button (click)="openEditModal(user)" class="bg-blue-500 text-white rounded px-6 py-2 hover:bg-blue-600 transition mr-2">Editar</button>
+                    <button (click)="deleteUser(user.id)" class="bg-red-500 text-white rounded px-6 py-2 hover:bg-red-600 transition">Eliminar</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Modal para editar usuario -->
+    <div *ngIf="isEditModalOpen && selectedUser" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-1/3">
+            <span (click)="closeEditModal()" class="cursor-pointer text-gray-500 float-right text-2xl">&times;</span>
+            <h2 class="text-lg font-bold mb-4">Editar Usuario</h2>
+            <input [(ngModel)]="selectedUser.name" placeholder="Nombre" class="border border-gray-300 rounded p-2 w-full mb-4" />
+            <div class="flex items-center mb-4">
+                <input [(ngModel)]="selectedUser.password" [type]="showPassword ? 'text' : 'password'" placeholder="Nueva Contraseña" class="border border-gray-300 rounded p-2 w-full" />
+                <button (click)="togglePasswordVisibility()" class="ml-2 text-gray-500">
+                    {{ showPassword ? 'Ocultar' : 'Mostrar' }}
+                </button>
+            </div>
+            <button (click)="saveUser()" class="bg-blue-500 text-white rounded px-6 py-2 hover:bg-blue-600 transition">Guardar</button>
+        </div>
+    </div>
+</div>

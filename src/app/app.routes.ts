@@ -42,6 +42,12 @@ export const routes: Routes = [
     title: 'Reportes'
   },
   {
+    path: 'users',
+    loadComponent: () => import('./components/shared/user-management/user-management.component')
+      .then(m => m.UserManagementComponent),
+    title: 'Gestión de Usuarios'
+  },
+  {
     path: '**',
     loadComponent: () => import('./components/shared/not-found/not-found.component')
       .then(m => m.NotFoundComponent),
