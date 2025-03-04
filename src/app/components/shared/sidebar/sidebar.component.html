@@ -1,5 +1,5 @@
 <aside [ngClass]="{'w-64': !isCollapsed, 'w-16': isCollapsed}" 
-       class="bg-slate-800 min-h-full shadow-lg transition-all duration-300">
+       class="bg-slate-800 h-full min-h-screen shadow-lg transition-all duration-300 flex flex-col z-10">
   
   <!-- Header del sidebar con el botón -->
   <div class="flex items-center justify-between p-4 border-b border-slate-700">
@@ -13,65 +13,103 @@
     </button>
   </div>
 
-  <nav class="p-4">
+  <nav class="p-4 flex-grow overflow-y-auto">
     <ul class="space-y-2">
       <!-- Dashboard -->
       <li>
         <a routerLink="/dashboard" 
-           routerLinkActive="bg-slate-700 text-white"
-           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200">
-          <i class="fas fa-chart-line w-6"></i>
-          <span [ngClass]="{'hidden': isCollapsed}">Dashboard</span>
+           routerLinkActive="bg-slate-700 text-white font-medium border-l-4 border-blue-500"
+           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200 relative group">
+          <i class="fas fa-chart-line w-6 text-center"></i>
+          <span [ngClass]="{'hidden': isCollapsed}" class="transition-all duration-200">Dashboard</span>
+          <!-- Tooltip para modo colapsado -->
+          <div *ngIf="isCollapsed" class="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+            Dashboard
+          </div>
         </a>
       </li>
 
       <!-- Equipos -->
       <li>
         <a routerLink="/equipos" 
-           routerLinkActive="bg-slate-700 text-white"
-           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200">
-          <i class="fas fa-desktop w-6"></i>
-          <span [ngClass]="{'hidden': isCollapsed}">Equipos</span>
+           routerLinkActive="bg-slate-700 text-white font-medium border-l-4 border-blue-500"
+           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200 relative group">
+          <i class="fas fa-desktop w-6 text-center"></i>
+          <span [ngClass]="{'hidden': isCollapsed}" class="transition-all duration-200">Equipos</span>
+          <!-- Tooltip para modo colapsado -->
+          <div *ngIf="isCollapsed" class="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+            Equipos
+          </div>
         </a>
       </li>
 
       <!-- Inventario -->
       <li>
         <a routerLink="/inventory" 
-           routerLinkActive="bg-slate-700 text-white"
-           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200">
-          <i class="fas fa-boxes w-6"></i>
-          <span [ngClass]="{'hidden': isCollapsed}">Inventario</span>
+           routerLinkActive="bg-slate-700 text-white font-medium border-l-4 border-blue-500"
+           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200 relative group">
+          <i class="fas fa-boxes w-6 text-center"></i>
+          <span [ngClass]="{'hidden': isCollapsed}" class="transition-all duration-200">Inventario</span>
+          <!-- Tooltip para modo colapsado -->
+          <div *ngIf="isCollapsed" class="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+            Inventario
+          </div>
         </a>
+      </li>
+
+      <!-- Separador de categorías -->
+      <li class="my-3">
+        <div class="border-t border-slate-700 pt-2">
+          <span [ngClass]="{'hidden': isCollapsed}" class="text-xs text-slate-500 uppercase px-3">Operaciones</span>
+        </div>
       </li>
 
       <!-- Mantenimiento -->
       <li>
         <a routerLink="/mantenimiento" 
-           routerLinkActive="bg-slate-700 text-white"
-           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200">
-          <i class="fas fa-tools w-6"></i>
-          <span [ngClass]="{'hidden': isCollapsed}">Mantenimiento</span>
+           routerLinkActive="bg-slate-700 text-white font-medium border-l-4 border-blue-500"
+           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200 relative group">
+          <i class="fas fa-tools w-6 text-center"></i>
+          <span [ngClass]="{'hidden': isCollapsed}" class="transition-all duration-200">Mantenimiento</span>
+          <!-- Tooltip para modo colapsado -->
+          <div *ngIf="isCollapsed" class="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+            Mantenimiento
+          </div>
         </a>
+      </li>
+
+      <!-- Separador de categorías -->
+      <li class="my-3">
+        <div class="border-t border-slate-700 pt-2">
+          <span [ngClass]="{'hidden': isCollapsed}" class="text-xs text-slate-500 uppercase px-3">Administración</span>
+        </div>
       </li>
 
       <!-- Usuarios -->
       <li>
         <a routerLink="/users" 
-           routerLinkActive="bg-slate-700 text-white"
-           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200">
-          <i class="fas fa-users w-6"></i>
-          <span [ngClass]="{'hidden': isCollapsed}">Usuarios</span>
+           routerLinkActive="bg-slate-700 text-white font-medium border-l-4 border-blue-500"
+           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200 relative group">
+          <i class="fas fa-users w-6 text-center"></i>
+          <span [ngClass]="{'hidden': isCollapsed}" class="transition-all duration-200">Usuarios</span>
+          <!-- Tooltip para modo colapsado -->
+          <div *ngIf="isCollapsed" class="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+            Usuarios
+          </div>
         </a>
       </li>
 
       <!-- Reportes -->
       <li>
         <a routerLink="/reports" 
-           routerLinkActive="bg-slate-700 text-white"
-           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200">
-          <i class="fas fa-file-alt w-6"></i>
-          <span [ngClass]="{'hidden': isCollapsed}">Reportes</span>
+           routerLinkActive="bg-slate-700 text-white font-medium border-l-4 border-blue-500"
+           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200 relative group">
+          <i class="fas fa-file-alt w-6 text-center"></i>
+          <span [ngClass]="{'hidden': isCollapsed}" class="transition-all duration-200">Reportes</span>
+          <!-- Tooltip para modo colapsado -->
+          <div *ngIf="isCollapsed" class="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+            Reportes
+          </div>
         </a>
       </li>
     </ul>
@@ -79,10 +117,14 @@
     <!-- Configuración -->
     <div class="mt-6 pt-6 border-t border-slate-700">
       <a routerLink="/configuracion"
-         routerLinkActive="bg-slate-700 text-white"
-         class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200">
-        <i class="fas fa-cog w-6"></i>
-        <span [ngClass]="{'hidden': isCollapsed}">Configuración</span>
+         routerLinkActive="bg-slate-700 text-white font-medium border-l-4 border-blue-500"
+         class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200 relative group">
+        <i class="fas fa-cog w-6 text-center"></i>
+        <span [ngClass]="{'hidden': isCollapsed}" class="transition-all duration-200">Configuración</span>
+        <!-- Tooltip para modo colapsado -->
+        <div *ngIf="isCollapsed" class="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+          Configuración
+        </div>
       </a>
     </div>
   </nav>

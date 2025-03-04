@@ -1,0 +1,7 @@
+.main-content {
+    margin-left: 4rem; /* 16px cuando está colapsado */
+  }
+  
+  .sidebar-expanded .main-content {
+    margin-left: 16rem; /* 64px cuando está expandido */
+  }
