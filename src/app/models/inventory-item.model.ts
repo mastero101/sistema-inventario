@@ -10,7 +10,7 @@ export interface InventoryItem {
   fechaRegistro: string; // ISO 8601 format (YYYY-MM-DD)
   ultimoMantenimiento?: string; // ISO 8601 format (YYYY-MM-DD)
   departamento?: 'TI' | 'Ventas' | 'Contabilidad' | 'RRHH' | 'Operaciones';
-  imagenUrl?: string;
+  imagen?: string;
   createdAt?: string; // ISO 8601 format
   updatedAt?: string; // ISO 8601 format
 }
@@ -26,5 +26,5 @@ export interface InventoryItemFormData {
   fechaRegistro: string;
   ultimoMantenimiento?: string;
   departamento?: 'TI' | 'Ventas' | 'Contabilidad' | 'RRHH' | 'Operaciones';
-  imagen?: File;
+  imagen?: File | string; // Acepta archivos y URLs
 }
