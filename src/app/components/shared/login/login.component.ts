@@ -1,25 +1,43 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
-  username: string = '';
+  email: string = '';
   password: string = '';
+  isLoading: boolean = false;
+  errorMessage: string | null = null;
 
-  login() {
-    // Lógica de autenticación
-    if (this.username === 'admin@admin.com' && this.password === 'admin') {
-      localStorage.setItem('loggedIn', 'true');
-      alert('Login exitoso');
-      window.location.reload();
-    } else {
-      alert('Credenciales incorrectas');
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  async login() {
+    this.isLoading = true;
+    this.errorMessage = null;
+    
+    try {
+      await this.authService.login(this.email, this.password);
+      this.router.navigate(['/inventory']);
+    } catch (error: any) {
+      this.handleError(error.message);
+    } finally {
+      this.isLoading = false;
     }
+  }
+
+  private handleError(errorMessage: string): void {
+    this.errorMessage = errorMessage;
+    setTimeout(() => this.errorMessage = null, 5000);
   }
 }
