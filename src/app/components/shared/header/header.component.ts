@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, ElementRef, AfterViewInit, inject, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, ViewChild, ElementRef, inject, Inject, PLATFORM_ID } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { isPlatformBrowser } from '@angular/common';
 import { LoginComponent } from '../../shared/login/login.component';
+import { AuthService } from '../../../services/auth.service';
 
 interface Notification {
   id: number;
@@ -21,8 +22,10 @@ interface Notification {
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
-export class HeaderComponent implements AfterViewInit {
+export class HeaderComponent {
   private document = inject(DOCUMENT);
+  private platformId = inject(PLATFORM_ID); // Add platformId injection
+
   @ViewChild('searchInput') searchInput!: ElementRef;
   
   isUserMenuOpen = false;
@@ -30,6 +33,7 @@ export class HeaderComponent implements AfterViewInit {
   isSearchOpen = false;
   notificationsCount = 3;
   isLoggedIn: boolean = false;
+  currentUser: any = null;
   
   notifications: Notification[] = [
     {
@@ -52,7 +56,11 @@ export class HeaderComponent implements AfterViewInit {
     }
   ];
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(private authService: AuthService) {
+    this.authService.user$.subscribe((user: any) => { // Change to user$ and add type annotation
+      this.currentUser = user;
+    });
+  }
 
   toggleUserMenu() {
     this.isUserMenuOpen = !this.isUserMenuOpen;

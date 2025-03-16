@@ -1,14 +1,18 @@
-import { Injectable } from '@angular/core';
-import axios, { AxiosInstance } from 'axios';  // Add AxiosInstance import
+import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { BehaviorSubject } from 'rxjs';
+import axios, { AxiosInstance } from 'axios';
 import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private axiosInstance: AxiosInstance;  // Declare the property
+  private axiosInstance: AxiosInstance;
+  private userSubject = new BehaviorSubject<any>(null);
+  user$ = this.userSubject.asObservable();
 
-  constructor() {
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     this.axiosInstance = axios.create({
       baseURL: environment.apiLoginUrl,
       headers: {
@@ -16,6 +20,26 @@ export class AuthService {
         'Accept': 'application/json'
       }
     });
+
+    // Initialize user data if in browser
+    if (isPlatformBrowser(this.platformId)) {
+      const storedUser = this.getUserFromStorage();
+      if (storedUser) {
+        this.userSubject.next(storedUser);
+      }
+    }
+  }
+
+  private getUserFromStorage() {
+    if (!isPlatformBrowser(this.platformId)) return null;
+    
+    if (!localStorage.getItem('authToken')) return null;
+    
+    return {
+      fullName: localStorage.getItem('userName'),
+      isAdmin: localStorage.getItem('isAdmin') === 'true',
+      token: localStorage.getItem('authToken')
+    };
   }
 
   async login(email: string, password: string): Promise<any> {
@@ -39,15 +63,28 @@ export class AuthService {
   }
 
   private setSession(authResult: any): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     localStorage.setItem('authToken', authResult.token);
     localStorage.setItem('isAdmin', authResult.isAdmin);
     localStorage.setItem('userName', authResult.fullName);
+    
+    // Update userSubject with new user data
+    this.userSubject.next({
+      fullName: authResult.fullName,
+      isAdmin: authResult.isAdmin,
+      token: authResult.token
+    });
   }
 
   logout(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     localStorage.removeItem('authToken');
     localStorage.removeItem('isAdmin');
     localStorage.removeItem('userName');
+    // Reset userSubject to null
+    this.userSubject.next(null);
   }
 
   getUserName(): string {
