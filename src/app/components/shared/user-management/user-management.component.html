@@ -1,54 +1,159 @@
-<div class="p-4">
-    <h2 class="text-lg font-bold mb-4">Gestión de Usuarios</h2>
+<div class="p-6 max-w-7xl mx-auto">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">Gestión de Usuarios</h2>
 
-    <!-- Formulario para agregar un nuevo usuario -->
-    <div class="mb-4">
-        <input [(ngModel)]="newUserName" placeholder="Nombre" class="border border-gray-300 rounded p-2 w-1/4 mr-2" />
-        <input [(ngModel)]="newUserPassword" type="password" placeholder="Contraseña" class="border border-gray-300 rounded p-2 w-1/4 mr-2" />
-        <button (click)="addUser()" class="bg-green-500 text-white rounded px-6 py-2 hover:bg-green-600 transition">Agregar Usuario</button>
+    <!-- Create user form -->
+    <form (ngSubmit)="addUser()" class="mb-8 p-6 border rounded-lg bg-white shadow-sm">
+        <h3 class="text-lg font-semibold mb-4 text-gray-700">Crear Nuevo Usuario</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre completo</label>
+                <input [(ngModel)]="newUser.fullName" name="fullName" required
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input [(ngModel)]="newUser.email" name="email" type="email" required
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+                <input [(ngModel)]="newUser.password" name="password" type="password" required
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar Contraseña</label>
+                <input [(ngModel)]="newUser.passwordConfirmation" name="passwordConfirmation" type="password" required
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" />
+            </div>
+        </div>
+        <button type="submit" 
+                [disabled]="isLoading"
+                class="mt-6 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:bg-green-300 transition-colors duration-200">
+            {{ isLoading ? 'Creando...' : 'Crear Usuario' }}
+        </button>
+    </form>
+
+    <!-- Status messages -->
+    <div class="mb-6">
+        <div *ngIf="isLoading" class="p-4 bg-blue-50 text-blue-700 rounded-lg">
+            <i class="fas fa-spinner fa-spin mr-2"></i> Cargando usuarios...
+        </div>
+        <div *ngIf="errorMessage" class="p-4 bg-red-50 text-red-700 rounded-lg">
+            <i class="fas fa-exclamation-circle mr-2"></i> {{ errorMessage }}
+        </div>
     </div>
 
-    <table class="min-w-full border border-gray-300">
-        <thead>
-            <tr class="bg-gray-200">
-                <th class="border border-gray-300 px-4 py-2">ID</th>
-                <th class="border border-gray-300 px-4 py-2">Nombre</th>
-                <th class="border border-gray-300 px-4 py-2">Contraseña</th>
-                <th class="border border-gray-300 px-4 py-2">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let user of users" class="hover:bg-gray-100">
-                <td class="border border-gray-300 px-4 py-2">{{ user.id }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ user.name }}</td>
-                <td class="border border-gray-300 px-4 py-2 flex items-center">
-                    <span *ngIf="!user.showPassword">{{ user.password | slice:0:0 }}*******</span>
-                    <span *ngIf="user.showPassword">{{ user.password }}</span>
-                    <button (click)="toggleUserPasswordVisibility(user)" class="ml-2 text-gray-500">
-                        <i class="fas" [ngClass]="user.showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
-                    </button>
-                </td>
-                <td class="border border-gray-300 px-4 py-2">
-                    <button (click)="openEditModal(user)" class="bg-blue-500 text-white rounded px-6 py-2 hover:bg-blue-600 transition mr-2">Editar</button>
-                    <button (click)="deleteUser(user.id)" class="bg-red-500 text-white rounded px-6 py-2 hover:bg-red-600 transition">Eliminar</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <!-- Users table -->
+    <div class="overflow-x-auto rounded-lg shadow">
+        <table class="min-w-full bg-white">
+            <thead>
+                <tr class="bg-gray-50 border-b">
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admin</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                <tr *ngFor="let user of users" class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.id }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.fullName }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center space-x-3">
+                            <span [ngClass]="user.isAdmin ? 'text-green-600' : 'text-gray-500'"
+                                  class="text-sm font-medium">
+                                {{ user.isAdmin ? 'Admin' : 'Usuario' }}
+                            </span>
+                            <button (click)="openConfirmAdminModal(user)" 
+                                    [disabled]="isLoading"
+                                    class="text-sm px-3 py-1.5 rounded-md transition-colors duration-200"
+                                    [ngClass]="user.isAdmin ? 
+                                              'bg-red-50 text-red-700 hover:bg-red-100' : 
+                                              'bg-green-50 text-green-700 hover:bg-green-100'">
+                                {{ user.isAdmin ? 'Remover Admin' : 'Hacer Admin' }}
+                            </button>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center space-x-3">
+                            <span [ngClass]="user.isActive ? 'text-green-600' : 'text-red-600'"
+                                  class="text-sm font-medium">
+                                {{ user.isActive ? 'Activo' : 'Inactivo' }}
+                            </span>
+                            <button (click)="toggleUserActive(user)" 
+                                    [disabled]="isLoading"
+                                    class="text-sm px-3 py-1.5 rounded-md transition-colors duration-200"
+                                    [ngClass]="user.isActive ? 
+                                              'bg-red-50 text-red-700 hover:bg-red-100' : 
+                                              'bg-green-50 text-green-700 hover:bg-green-100'">
+                                {{ user.isActive ? 'Desactivar' : 'Activar' }}
+                            </button>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button (click)="openDeleteModal(user)" 
+                                [disabled]="isLoading"
+                                class="text-sm px-3 py-1.5 rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors duration-200">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-    <!-- Modal para editar usuario -->
-    <div *ngIf="isEditModalOpen && selectedUser" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-1/3">
-            <span (click)="closeEditModal()" class="cursor-pointer text-gray-500 float-right text-2xl">&times;</span>
-            <h2 class="text-lg font-bold mb-4">Editar Usuario</h2>
-            <input [(ngModel)]="selectedUser.name" placeholder="Nombre" class="border border-gray-300 rounded p-2 w-full mb-4" />
-            <div class="flex items-center mb-4">
-                <input [(ngModel)]="selectedUser.password" [type]="showPassword ? 'text' : 'password'" placeholder="Nueva Contraseña" class="border border-gray-300 rounded p-2 w-full" />
-                <button (click)="togglePasswordVisibility()" class="ml-2 text-gray-500">
-                    {{ showPassword ? 'Ocultar' : 'Mostrar' }}
+    <!-- Modals remain the same but with updated styles -->
+    <div *ngIf="showConfirmModal && selectedUserForAdmin" 
+         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <h3 class="text-xl font-bold mb-4 text-gray-900">Confirmar cambio de rol</h3>
+            <p class="mb-6 text-gray-600">
+                ¿Está seguro que desea {{ selectedUserForAdmin.isAdmin ? 'remover los privilegios de administrador de' : 'hacer administrador a' }} 
+                <span class="font-semibold text-gray-900">{{ selectedUserForAdmin.fullName }}</span>?
+            </p>
+            <div class="flex justify-end gap-4">
+                <button (click)="closeConfirmModal()"
+                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                    Cancelar
+                </button>
+                <button (click)="confirmToggleAdmin()"
+                        [disabled]="isLoading"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors duration-200">
+                    Confirmar
                 </button>
             </div>
-            <button (click)="saveUser()" class="bg-blue-500 text-white rounded px-6 py-2 hover:bg-blue-600 transition">Guardar</button>
+        </div>
+    </div>
+
+    <div *ngIf="showDeleteModal && selectedUserForDelete" 
+         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <h3 class="text-xl font-bold mb-4 text-gray-900">Confirmar eliminación</h3>
+            <p class="mb-4 text-gray-600">
+                ¿Está seguro que desea eliminar al usuario 
+                <span class="font-semibold text-gray-900">{{ selectedUserForDelete.fullName }}</span>?
+                Esta acción no se puede deshacer.
+            </p>
+            
+            <div *ngIf="deleteErrorMessage" class="mb-4 p-4 bg-red-50 text-red-700 rounded-lg">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                {{ deleteErrorMessage }}
+            </div>
+
+            <div class="flex justify-end gap-4">
+                <button (click)="closeDeleteModal()"
+                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                    Cancelar
+                </button>
+                <button (click)="confirmDelete()"
+                        [disabled]="isLoading"
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-300 transition-colors duration-200">
+                    {{ isLoading ? 'Eliminando...' : 'Eliminar' }}
+                </button>
+            </div>
         </div>
     </div>
 </div>

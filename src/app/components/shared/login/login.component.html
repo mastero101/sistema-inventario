@@ -1,4 +1,4 @@
-<div class="p-4">
+<div class="p-4" *ngIf="!authService.isAuthenticated()">
   <h2 class="text-lg font-bold mb-4">Iniciar Sesión</h2>
   <form (ngSubmit)="login()">
     <!-- Email input -->
@@ -18,12 +18,21 @@
     <!-- Status messages -->
     <div *ngIf="isLoading" class="mb-4 text-blue-600">Verificando credenciales...</div>
     <div *ngIf="errorMessage" class="mb-4 text-red-600">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="mb-4 text-green-600">{{ successMessage }}</div>
 
-    <!-- Single submit button -->
+    <!-- Submit button -->
     <button type="submit" 
-            [disabled]="isLoading"
+            [disabled]="!email || !password || isLoading"
             class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:bg-blue-300">
-      Ingresar
+      {{ isLoading ? 'Ingresando...' : 'Ingresar' }}
     </button>
   </form>
+</div>
+
+<div class="p-4" *ngIf="authService.isAuthenticated()">
+  <div class="text-green-600 mb-4">¡Bienvenido {{ userName }}!</div>
+  <button (click)="logout()" 
+          class="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700">
+    Cerrar Sesión
+  </button>
 </div>
