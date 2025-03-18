@@ -7,8 +7,13 @@
 
     <div class="relative">
       <button class="flex items-center space-x-2" (click)="toggleUserMenu()">
-        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-100 flex items-center justify-center">
-          <i class="fas fa-user text-slate-600"></i>
+        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
+          <img 
+            [src]="currentUser?.profileUrl" 
+            alt="Profile" 
+            class="w-full h-full object-cover"
+            (error)="onImageError($event)"
+          >
         </div>
         <div class="hidden sm:block">
           <p class="text-sm font-medium text-slate-700">{{ currentUser?.fullName || 'Invitado' }}</p>
@@ -21,24 +26,16 @@
       <div *ngIf="isUserMenuOpen" 
            class="absolute right-0 top-full mt-2 w-48 sm:w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
         <div class="py-1" *ngIf="isLoggedIn; else loginRegisterTemplate">
-          <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+          <a routerLink="/configuracion" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
             <i class="fas fa-user-circle mr-2"></i>Mi Perfil
           </a>
-          <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
-            <i class="fas fa-cog mr-2"></i>Configuración
-          </a>
           <div class="border-t border-slate-200"></div>
-          <a href="#" (click)="logout()" class="block px-4 py-2 text-sm text-red-600 hover:bg-slate-100">
+          <button (click)="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-100">
             <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
-          </a>
+          </button>
         </div>
         <ng-template #loginRegisterTemplate>
-          <app-login></app-login>
-          <div class="px-4 pb-3 pt-1 border-t border-slate-200">
-            <a href="#" class="block w-full py-2 text-sm text-center text-blue-600 hover:text-blue-700">
-              Registrarse
-            </a>
-          </div>
+          <app-login (loginSuccess)="isUserMenuOpen = false"></app-login>
         </ng-template>
       </div>
     </div>

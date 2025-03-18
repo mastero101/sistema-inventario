@@ -98,4 +98,75 @@ export class UserService {
         throw new Error(error.response?.data?.errors?.[0] || 'Error deleting user');
       }
     }
+
+  async getUserProfile(userId: number): Promise<any> {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      const response = await axios.get(`${environment.apiLoginUrl}/api/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      return response.data.content;
+    } catch (error: any) {
+      console.error('Error fetching user profile:', error);
+      throw new Error(error.response?.data?.errors || 'Failed to fetch user profile');
+    }
+  }
+
+  async updateProfileImage(imageFile: File): Promise<any> {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('No token found');
+      }
+  
+      const formData = new FormData();
+      formData.append('imageFile', imageFile);
+  
+      const response = await axios.post(
+        `${environment.apiLoginUrl}/api/users/update-profile`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+  
+      return response.data;
+    } catch (error: any) {
+      console.error('Error updating profile image:', error);
+      throw new Error(error.response?.data?.errors || 'Failed to update profile image');
+    }
+  }
+
+  async deleteProfileImage(): Promise<any> {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      const response = await axios.delete(
+        `${environment.apiLoginUrl}/api/users/update-profile`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Error deleting profile image:', error);
+      throw new Error(error.response?.data?.errors || 'Failed to delete profile image');
+    }
+  }
 }

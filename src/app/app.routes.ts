@@ -48,6 +48,12 @@ export const routes: Routes = [
     title: 'Gestión de Usuarios'
   },
   {
+    path: 'configuracion',
+    loadComponent: () => import('./components/shared/user-profile/user-profile.component')
+      .then(m => m.UserProfileComponent),
+    title: 'Mi Perfil'
+  },
+  {
     path: '**',
     loadComponent: () => import('./components/shared/not-found/not-found.component')
       .then(m => m.NotFoundComponent),

@@ -85,10 +85,40 @@ export class AuthService {
     localStorage.removeItem('userName');
     // Reset userSubject to null
     this.userSubject.next(null);
+    
+    // Reload the page after logout
+    window.location.reload();
   }
 
   getUserName(): string {
     return localStorage.getItem('userName') || '';
+  }
+
+  getCurrentUser(): any {
+    if (!isPlatformBrowser(this.platformId)) return null;
+    
+    const token = localStorage.getItem('authToken');
+    if (!token) return null;
+    
+    // Parse the JWT token to get the user ID
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      
+      const payload = JSON.parse(jsonPayload);
+      return {
+        id: payload.Id,
+        fullName: localStorage.getItem('userName'),
+        isAdmin: localStorage.getItem('isAdmin') === 'true',
+        email: payload.Email
+      };
+    } catch (e) {
+      console.error('Error parsing JWT token', e);
+      return null;
+    }
   }
 
   isAuthenticated(): boolean {

@@ -45,6 +45,35 @@
 
     <!-- Users table -->
     <div class="overflow-x-auto rounded-lg shadow">
+        <!-- Agregar esto antes de la tabla de usuarios -->
+        <div class="mb-4 p-4 bg-white rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Filtros</h3>
+          <div class="flex flex-wrap gap-4 items-center">
+            <div class="flex-grow">
+              <input 
+                type="text" 
+                [(ngModel)]="searchTerm" 
+                (input)="onSearchChange()"
+                placeholder="Buscar por nombre o email" 
+                class="w-full p-2 border rounded"
+              >
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" [(ngModel)]="showOnlyActive" (change)="applyFilters()">
+                <span>Solo activos</span>
+              </label>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" [(ngModel)]="showOnlyAdmins" (change)="applyFilters()">
+                <span>Solo administradores</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Modificar la tabla para usar filteredUsers en lugar de users -->
         <table class="min-w-full bg-white">
             <thead>
                 <tr class="bg-gray-50 border-b">
@@ -57,7 +86,7 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-                <tr *ngFor="let user of users" class="hover:bg-gray-50">
+                <tr *ngFor="let user of filteredUsers" class="border-b hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.id }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.fullName }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}</td>

@@ -20,6 +20,10 @@ interface User {
 })
 export class UserManagementComponent implements OnInit {
   users: User[] = [];
+  filteredUsers: User[] = [];
+  searchTerm: string = '';
+  showOnlyActive: boolean = false;
+  showOnlyAdmins: boolean = false;
   isLoading = false;
   errorMessage: string | null = null;
   newUser = {
@@ -39,11 +43,43 @@ export class UserManagementComponent implements OnInit {
     try {
       this.isLoading = true;
       this.users = await this.userService.getUsers();
+      this.applyFilters();
     } catch (error: any) {
       this.errorMessage = error.message;
     } finally {
       this.isLoading = false;
     }
+  }
+
+  applyFilters() {
+    this.filteredUsers = this.users.filter(user => {
+      // Apply search term filter
+      const matchesSearch = this.searchTerm === '' || 
+        user.fullName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(this.searchTerm.toLowerCase());
+      
+      // Apply active filter
+      const matchesActive = !this.showOnlyActive || user.isActive;
+      
+      // Apply admin filter
+      const matchesAdmin = !this.showOnlyAdmins || user.isAdmin;
+      
+      return matchesSearch && matchesActive && matchesAdmin;
+    });
+  }
+
+  onSearchChange() {
+    this.applyFilters();
+  }
+
+  toggleActiveFilter() {
+    this.showOnlyActive = !this.showOnlyActive;
+    this.applyFilters();
+  }
+
+  toggleAdminFilter() {
+    this.showOnlyAdmins = !this.showOnlyAdmins;
+    this.applyFilters();
   }
 
   async addUser() {
