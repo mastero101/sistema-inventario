@@ -16,8 +16,8 @@
           >
         </div>
         <div class="hidden sm:block">
-          <p class="text-sm font-medium text-slate-700">{{ currentUser?.fullName || 'Invitado' }}</p>
-          <p class="text-xs text-slate-500">{{ currentUser?.isAdmin ? 'Administrador' : 'Usuario' }}</p>
+          <p class="text-sm font-medium text-slate-700">{{ userName }}</p>
+          <p class="text-xs text-slate-500">{{ isAdmin ? 'Administrador' : 'Usuario' }}</p>
         </div>
         <i class="fas fa-chevron-down text-slate-400 hidden sm:block"></i>
       </button>

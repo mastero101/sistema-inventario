@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,6 +12,7 @@ import { AuthService } from '../../../services/auth.service';
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
+  @Output() loginSuccess = new EventEmitter<void>();
   email: string = '';
   password: string = '';
   isLoading: boolean = false;
@@ -39,10 +40,13 @@ export class LoginComponent {
       this.userName = response.content.fullName;
       this.successMessage = '¡Inicio de sesión exitoso!';
       
-      // Add delay before navigation
+      // Modify this part
       setTimeout(() => {
-        this.router.navigate(['/dashboard']);
-      }, 1500);
+        this.loginSuccess.emit();  // Emit the success event
+        this.router.navigate(['/dashboard']).then(() => {
+          window.location.reload();
+        });
+      }, 500);
     } catch (error: any) {
       this.handleError(error.message);
     } finally {

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';  // Add this import
 import { Component, ViewChild, ElementRef, PLATFORM_ID, OnInit, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
@@ -23,6 +23,8 @@ export class HeaderComponent implements OnInit {
   isLoggedIn = false;
   isSearchOpen = false;
   defaultProfileImage = 'assets/default-profile.jpg';
+  userName: string = 'Invitado';
+  // Remove the isAdmin property since we're using a getter
   @ViewChild('searchInput') searchInput!: ElementRef;
 
   constructor(
@@ -34,24 +36,34 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit() {
     this.authService.user$.subscribe(async (user) => {
-      if (user && user.id) {
+      if (user && user.token) {
         this.isLoggedIn = true;
+        this.userName = user.fullName;
         try {
           const userProfile = await this.userService.getUserProfile(user.id);
           this.currentUser = {
             ...user,
-            ...userProfile  // This will include all profile data including profileUrl
+            ...userProfile,
+            isAdmin: user.isAdmin // Ensure we use the parsed boolean value
           };
-          console.log('Profile loaded:', this.currentUser); // Debug profile data
         } catch (error) {
           console.error('Error loading user profile:', error);
-          this.currentUser = user;
+          this.currentUser = {
+            ...user,
+            isAdmin: user.isAdmin // Ensure we use the parsed boolean value
+          };
         }
       } else {
         this.isLoggedIn = false;
         this.currentUser = null;
+        this.userName = 'Invitado';
       }
     });
+  }
+
+  // Keep the getter for isAdmin
+  get isAdmin(): boolean {
+    return this.currentUser?.isAdmin || false;
   }
 
   onImageError(event: Event): void {

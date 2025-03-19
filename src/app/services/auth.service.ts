@@ -33,13 +33,54 @@ export class AuthService {
   private getUserFromStorage() {
     if (!isPlatformBrowser(this.platformId)) return null;
     
-    if (!localStorage.getItem('authToken')) return null;
+    const token = localStorage.getItem('authToken');
+    if (!token) return null;
     
+    const tokenPayload = this.parseJwt(token);
     return {
-      fullName: localStorage.getItem('userName'),
-      isAdmin: localStorage.getItem('isAdmin') === 'true',
-      token: localStorage.getItem('authToken')
+      fullName: tokenPayload.Email?.split('@')[0] || 'Usuario', // Use email as fallback name
+      isAdmin: tokenPayload.IsAdmin,
+      token: token,
+      id: tokenPayload.Id
     };
+  }
+
+  private setSession(authResult: any): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    // Only store the token
+    localStorage.setItem('authToken', authResult.token);
+    
+    const tokenPayload = this.parseJwt(authResult.token);
+    
+    // Update userSubject with data from token
+    this.userSubject.next({
+      fullName: tokenPayload.FullName,
+      isAdmin: tokenPayload.IsAdmin || false,
+      token: authResult.token,
+      id: tokenPayload.Id,
+      email: tokenPayload.Email
+    });
+  }
+
+  // Add helper method to parse JWT
+  private parseJwt(token: string): any {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      
+      const payload = JSON.parse(jsonPayload);
+      return {
+        ...payload,
+        IsAdmin: payload.IsAdmin?.toLowerCase() === 'true' // Convert string to boolean
+      };
+    } catch (e) {
+      console.error('Error parsing JWT token:', e);
+      return {};
+    }
   }
 
   async login(email: string, password: string): Promise<any> {
@@ -60,21 +101,6 @@ export class AuthService {
     } catch (error: any) {
       throw new Error(error.response?.data?.errors?.[0] || 'Error en el servidor');
     }
-  }
-
-  private setSession(authResult: any): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-
-    localStorage.setItem('authToken', authResult.token);
-    localStorage.setItem('isAdmin', authResult.isAdmin);
-    localStorage.setItem('userName', authResult.fullName);
-    
-    // Update userSubject with new user data
-    this.userSubject.next({
-      fullName: authResult.fullName,
-      isAdmin: authResult.isAdmin,
-      token: authResult.token
-    });
   }
 
   logout(): void {
