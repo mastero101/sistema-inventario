@@ -106,7 +106,7 @@ export class UserService {
         throw new Error('No token found');
       }
 
-      const response = await axios.get(`${environment.apiLoginUrl}/api/users/${userId}`, {
+      const response = await axios.get(`${environment.apiLoginUrl}/api/users/profile`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
