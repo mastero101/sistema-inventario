@@ -86,6 +86,21 @@ interface CategoryResponse {
   content: Category[];
 }
 
+interface InventoryItemDetail {
+  id: number;
+  serialNumber: string | null;
+  inventoryNumber: string | null;
+  description: string;
+  assignedTo: string | null;
+  itemType: ElementData | null;
+  brand: ElementData | null;
+  model: ElementData | null;
+  source: ElementData | null;
+  status: ElementData | null;
+  assignedArea: ElementData | null;
+  assignedSubArea: ElementData | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -281,7 +296,7 @@ export class PaginatedService {
     }
   }
 
-  // Add create method
+  // Add new method to create inventory item
   async createInventoryItem(item: CreateInventoryRequest): Promise<boolean> {
     try {
       // Validate required IDs
@@ -303,6 +318,9 @@ export class PaginatedService {
         description: item.description || '',
         assignedTo: item.assignedTo || ''
       };
+  
+      // Add console.log to see the request data
+      console.log('Request Data being sent to backend:', requestData);
   
       const response = await this.axiosInstance.post('/api/inventory', requestData);
       
@@ -354,6 +372,41 @@ export class PaginatedService {
     } catch (error) {
       console.error(`Error fetching ${categoryName} elements:`, error);
       return [];
+    }
+  }
+
+  // Add this new method
+  async getInventoryItemById(id: number | string): Promise<InventoryItem> {
+    try {
+      const response = await this.axiosInstance.get<{
+        statusCode: number;
+        errors: string[] | null;
+        content: InventoryItemDetail;
+      }>(`/api/inventory/${id}`);
+
+      if (response.data.statusCode === 200) {
+        const detail = response.data.content;
+        // Map the detailed response to our InventoryItem model
+        return this.mapInventoryResponse({
+          id: detail.id,
+          serialNumber: detail.serialNumber || '',
+          inventoryNumber: detail.inventoryNumber || '',
+          description: detail.description,
+          assignedTo: detail.assignedTo,
+          itemType: detail.itemType || { id: 0, elementKey: '', elementValue: 'No especificado' },
+          brand: detail.brand || { id: 0, elementKey: '', elementValue: 'No especificado' },
+          model: detail.model || { id: 0, elementKey: '', elementValue: 'No especificado' },
+          status: detail.status || { id: 0, elementKey: '', elementValue: 'Disponible' },
+          source: detail.source || { id: 0, elementKey: '', elementValue: 'No especificado' },
+          assignedArea: detail.assignedArea || { id: 0, elementKey: '', elementValue: 'No especificado' },
+          assignedSubArea: detail.assignedSubArea || { id: 0, elementKey: '', elementValue: '' }
+        });
+      }
+
+      throw new Error(response.data.errors?.[0] || 'Error fetching inventory item details');
+    } catch (error: any) {
+      console.error('Get Item Detail Error:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.errors?.[0] || 'Error fetching inventory item details');
     }
   }
 }

@@ -291,4 +291,30 @@ export class InventoryPaginatedComponent implements OnInit {
       throw error;
     }
   }
+
+  // Add these properties to the component class
+  showDetailsModal: boolean = false;
+  selectedItem: any = null;  // You might want to create a proper interface for this
+
+  // Add this method to close the details modal
+  closeDetailsModal(): void {
+    this.showDetailsModal = false;
+    this.selectedItem = null;
+  }
+
+  // Update showItemDetails method to handle the response data
+  async showItemDetails(id: string | undefined): Promise<void> {
+    if (!id) return;
+    
+    try {
+      this.isLoading = true;
+      const item = await this.paginatedService.getInventoryItemById(id);
+      this.selectedItem = item;
+      this.showDetailsModal = true;
+    } catch (error) {
+      this.errorMessage = 'Error al cargar los detalles del item: ' + (error as Error).message;
+    } finally {
+      this.isLoading = false;
+    }
+  }
 }
