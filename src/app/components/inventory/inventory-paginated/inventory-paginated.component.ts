@@ -5,6 +5,35 @@ import { isPlatformBrowser } from '@angular/common';
 import { PaginatedService } from '../../../services/paginated.service';
 import { InventoryItem } from '../../../models/inventory-item.model';
 
+// Define interface outside the component
+interface FilterOption {
+  id: number;
+  value: string;
+}
+
+// Add CreateInventoryRequest interface
+interface CreateInventoryRequest {
+  serialNumber: string;
+  inventoryNumber: string;
+  description: string;
+  assignedTo?: string;
+  numberOfCopies: number;
+  brandId: number;
+  modelId: number;
+  itemTypeId: number;
+  sourceId: number;
+  assignedAreaId: number;
+  assignedSubAreaId: number;
+  statusId: number;
+}
+
+// Add DynamicCategoryElement interface
+interface DynamicCategoryElement {
+  id: number;
+  elementKey: string;
+  elementValue: string;
+}
+
 @Component({
   selector: 'app-inventory-paginated',
   standalone: true,
@@ -13,6 +42,7 @@ import { InventoryItem } from '../../../models/inventory-item.model';
   styleUrls: ['./inventory-paginated.component.scss']
 })
 export class InventoryPaginatedComponent implements OnInit {
+  // Basic properties
   isLoading: boolean = false;
   errorMessage: string | null = null;
   inventoryItems: InventoryItem[] = [];
@@ -21,39 +51,96 @@ export class InventoryPaginatedComponent implements OnInit {
   currentPage: number = 0;
   pageSize: number = 10;
 
+  // Filter properties
+  searchTerm: string = '';
+  selectedType: number = 0;
+  selectedBrand: number = 0;
+  selectedStatus: number = 0;
+  private searchDebounce: ReturnType<typeof setTimeout> | null = null;
+
+  // Update filter options to be dynamic
+  typeOptions: FilterOption[] = [];
+  brandOptions: FilterOption[] = [];
+  statusOptions: FilterOption[] = [];
+  modelOptions: FilterOption[] = [];
+  sourceOptions: FilterOption[] = [];
+  areaOptions: FilterOption[] = [];
+  subAreaOptions: FilterOption[] = [];
+
   constructor(
-    private paginatedService: PaginatedService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    private readonly paginatedService: PaginatedService,
+    @Inject(PLATFORM_ID) private readonly platformId: Object
   ) {}
 
-  ngOnInit(): void {
-    this.loadPaginatedInventory();
+  // Update createItem to ensure all required IDs are set
+  async createItem(): Promise<void> {
+    try {
+      // Validate required fields
+      if (!this.newItem.serialNumber || !this.newItem.inventoryNumber) {
+        throw new Error('Serial y número de inventario son requeridos');
+      }
+
+      // Ensure all IDs are valid
+      if (!this.newItem.brandId || !this.newItem.modelId || !this.newItem.itemTypeId ||
+          !this.newItem.sourceId || !this.newItem.assignedAreaId ||
+          !this.newItem.assignedSubAreaId || !this.newItem.statusId) {
+        throw new Error('Todos los campos de selección son requeridos');
+      }
+
+      this.isLoading = true;
+      await this.paginatedService.createInventoryItem(this.newItem);
+      this.toggleModal();
+      await this.loadPaginatedInventory();
+    } catch (error) {
+      this.errorMessage = 'Error al crear el elemento: ' + (error as Error).message;
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   async loadPaginatedInventory(): Promise<void> {
     this.isLoading = true;
     try {
       if (isPlatformBrowser(this.platformId)) {
-        // Use getPaginatedInventory instead of getPaginatedData
         const paginatedResponse = await this.paginatedService.getPaginatedInventory({
           pageIndex: this.currentPage,
           pageSize: this.pageSize,
           sortDirection: 'asc',
-          sortProperty: 'string'
+          sortProperty: 'string',
+          searchValue: this.searchTerm,
+          itemTypeId: this.selectedType,
+          brandId: this.selectedBrand,
+          statusId: this.selectedStatus
         });
 
         this.inventoryItems = paginatedResponse.content.items;
         this.totalItems = paginatedResponse.content.totalItems;
         this.totalPages = paginatedResponse.content.totalPages;
-        
-        console.log('Mapped inventory items:', this.inventoryItems);
       }
     } catch (error) {
       this.errorMessage = 'Error al cargar el inventario: ' + (error as Error).message;
-      console.error('Error loading inventory:', error);
     } finally {
       this.isLoading = false;
     }
+  }
+
+  // Remove the helper methods as they're no longer needed
+  // Remove getTypeId, getBrandId, and getStatusId methods
+  // Add search handler with debounce
+  onSearch(): void {
+    if (this.searchDebounce) {
+      clearTimeout(this.searchDebounce);
+    }
+    this.searchDebounce = setTimeout(() => {
+      this.currentPage = 0;
+      this.loadPaginatedInventory();
+    }, 300);
+  }
+
+  // Add filter handlers
+  onFilterChange(): void {
+    this.currentPage = 0;
+    this.loadPaginatedInventory();
   }
 
   onPageChange(newPage: number): void {
@@ -75,4 +162,135 @@ export class InventoryPaginatedComponent implements OnInit {
           return 'bg-gray-100 text-gray-800';
       }
     }
+
+  // Update the deleteItem method signature to accept optional undefined
+  async deleteItem(id: string | undefined): Promise<void> {
+    if (!id) return; // Early return if id is undefined
+    
+    if (confirm('¿Está seguro que desea eliminar este elemento?')) {
+      try {
+        this.isLoading = true;
+        await this.paginatedService.deleteInventoryItem(id);
+        // Reload the data after successful deletion
+        await this.loadPaginatedInventory();
+      } catch (error) {
+        this.errorMessage = 'Error al eliminar el elemento: ' + (error as Error).message;
+      } finally {
+        this.isLoading = false;
+      }
+    }
+  }
+
+  async exportToExcel(): Promise<void> {
+    try {
+      this.isLoading = true;
+      await this.paginatedService.downloadExcel({
+        searchValue: this.searchTerm,
+        itemTypeId: this.selectedType,
+        brandId: this.selectedBrand,
+        statusId: this.selectedStatus
+      });
+    } catch (error) {
+      this.errorMessage = 'Error al exportar a Excel: ' + (error as Error).message;
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  // Add modal and form properties
+  showModal: boolean = false;
+  newItem: CreateInventoryRequest = {
+    serialNumber: '',
+    inventoryNumber: '',
+    description: '',
+    assignedTo: '',
+    numberOfCopies: 1,
+    brandId: 0,
+    modelId: 0,
+    itemTypeId: 0,
+    sourceId: 0,
+    assignedAreaId: 0,
+    assignedSubAreaId: 0,
+    statusId: 0
+  };
+
+  // Add modal methods
+  toggleModal(): void {
+    this.showModal = !this.showModal;
+    if (!this.showModal) {
+      this.resetForm();
+    }
+  }
+
+  resetForm(): void {
+    this.newItem = {
+      serialNumber: '',
+      inventoryNumber: '',
+      description: '',
+      assignedTo: '',
+      numberOfCopies: 1,
+      brandId: 0,
+      modelId: 0,
+      itemTypeId: 0,
+      sourceId: 0,
+      assignedAreaId: 0,
+      assignedSubAreaId: 0,
+      statusId: 0
+    };
+  }
+
+  ngOnInit(): void {
+    // Check authentication before initializing
+    if (isPlatformBrowser(this.platformId)) {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        this.initializeComponent();
+      } else {
+        this.errorMessage = 'Por favor inicie sesión para acceder al inventario';
+      }
+    }
+  }
+
+  private async initializeComponent(): Promise<void> {
+    try {
+      this.isLoading = true;
+      await this.loadCategories();
+      await this.loadPaginatedInventory();
+    } catch (error) {
+      this.errorMessage = 'Error al inicializar: ' + (error as Error).message;
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  // Remove the first loadCategories method (around line 76)
+  // and keep only this improved version
+  async loadCategories(): Promise<void> {
+    try {
+      this.isLoading = true;
+      
+      const [brands, types, statuses, models, sources, areas, subAreas] = await Promise.all([
+        this.paginatedService.getCategoryElements('Marcas'),
+        this.paginatedService.getCategoryElements('Tipo'),
+        this.paginatedService.getCategoryElements('Estados'),
+        this.paginatedService.getCategoryElements('Modelos'),
+        this.paginatedService.getCategoryElements('Origen'),
+        this.paginatedService.getCategoryElements('Areas'),
+        this.paginatedService.getCategoryElements('SubAreas')
+      ]);
+
+      // Map results only if they exist
+      this.brandOptions = brands?.map((b: DynamicCategoryElement) => ({ id: b.id, value: b.elementValue })) || [];
+      this.typeOptions = types?.map((t: DynamicCategoryElement) => ({ id: t.id, value: t.elementValue })) || [];
+      this.statusOptions = statuses?.map((s: DynamicCategoryElement) => ({ id: s.id, value: s.elementValue })) || [];
+      this.modelOptions = models?.map((m: DynamicCategoryElement) => ({ id: m.id, value: m.elementValue })) || [];
+      this.sourceOptions = sources?.map((s: DynamicCategoryElement) => ({ id: s.id, value: s.elementValue })) || [];
+      this.areaOptions = areas?.map((a: DynamicCategoryElement) => ({ id: a.id, value: a.elementValue })) || [];
+      this.subAreaOptions = subAreas?.map((sa: DynamicCategoryElement) => ({ id: sa.id, value: sa.elementValue })) || [];
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      this.errorMessage = 'Error al cargar las categorías. Por favor, verifique su conexión e inicie sesión nuevamente.';
+      throw error;
+    }
+  }
 }
