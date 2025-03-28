@@ -1,56 +1,102 @@
-<div class="container">
-  <div *ngIf="isLoading" class="loading">
-    Cargando...
+<div class="container mx-auto px-4 py-8">
+  <div *ngIf="isLoading" class="flex justify-center items-center p-8">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
   </div>
 
-  <div *ngIf="errorMessage" class="error-message">
+  <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
     {{ errorMessage }}
   </div>
 
-  <div *ngIf="!isLoading && !errorMessage" class="inventory-list">
-    <table>
-      <thead>
+  <div *ngIf="!isLoading && !errorMessage" class="overflow-x-auto bg-white rounded-lg shadow">
+    <!-- Mobile view -->
+    <div class="block md:hidden">
+      <div *ngFor="let item of inventoryItems" class="p-4 border-b">
+        <div class="grid grid-cols-2 gap-2">
+          <div class="text-gray-600">ID:</div>
+          <div>{{ item.id }}</div>
+          <div class="text-gray-600">Serial:</div>
+          <div>{{ item.serial }}</div>
+          <div class="text-gray-600">Tipo:</div>
+          <div>{{ item.tipo }}</div>
+          <div class="text-gray-600">Marca:</div>
+          <div>{{ item.marca }}</div>
+          <div class="text-gray-600">Estado:</div>
+          <div><span [class]="'px-2 py-1 rounded-full text-xs ' + getStatusClass(item.estado)">{{ item.estado }}</span></div>
+          <div class="text-gray-600">Asignado a:</div>
+          <div>{{ item.asignadoA || 'No asignado' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop view -->
+    <table class="hidden md:table min-w-full">
+      <thead class="bg-gray-50">
         <tr>
-          <th>ID</th>
-          <th>Serial</th>
-          <th>Tipo</th>
-          <th>Marca</th>
-          <th>Modelo</th>
-          <th>Estado</th>
-          <th>Ubicación</th>
-          <th>Departamento</th>
-          <th>Asignado a</th>
-          <th>Fecha Registro</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serial</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marca</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asignado a</th>
         </tr>
       </thead>
-      <tbody>
-        <tr *ngFor="let item of inventoryItems">
-          <td>{{ item.id }}</td>
-          <td>{{ item.serial }}</td>
-          <td>{{ item.tipo }}</td>
-          <td>{{ item.marca }}</td>
-          <td>{{ item.modelo }}</td>
-          <td>{{ item.estado }}</td>
-          <td>{{ item.ubicacion }}</td>
-          <td>{{ item.departamento }}</td>
-          <td>{{ item.asignadoA || 'No asignado' }}</td>
-          <td>{{ item.fechaRegistro | date:'dd/MM/yyyy' }}</td>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let item of inventoryItems" class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap text-sm">{{ item.id }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">{{ item.serial }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">{{ item.tipo }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">{{ item.marca }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">
+            <span [class]="'px-2 py-1 rounded-full text-xs ' + getStatusClass(item.estado)">{{ item.estado }}</span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">{{ item.ubicacion }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm">{{ item.asignadoA || 'No asignado' }}</td>
         </tr>
       </tbody>
     </table>
 
-    <div class="pagination">
-      <button 
-        [disabled]="currentPage === 0"
-        (click)="onPageChange(currentPage - 1)">
-        Anterior
-      </button>
-      <span>Página {{ currentPage + 1 }} de {{ totalPages }}</span>
-      <button 
-        [disabled]="currentPage >= totalPages - 1"
-        (click)="onPageChange(currentPage + 1)">
-        Siguiente
-      </button>
+    <!-- Pagination -->
+    <div class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+      <div class="flex-1 flex justify-between sm:hidden">
+        <button 
+          [disabled]="currentPage === 0"
+          (click)="onPageChange(currentPage - 1)"
+          class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400">
+          Anterior
+        </button>
+        <button 
+          [disabled]="currentPage >= totalPages - 1"
+          (click)="onPageChange(currentPage + 1)"
+          class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400">
+          Siguiente
+        </button>
+      </div>
+      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm text-gray-700">
+            Mostrando página <span class="font-medium">{{ currentPage + 1 }}</span> de <span class="font-medium">{{ totalPages }}</span>
+          </p>
+        </div>
+        <div>
+          <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+            <button 
+              [disabled]="currentPage === 0"
+              (click)="onPageChange(currentPage - 1)"
+              class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400">
+              <span class="sr-only">Anterior</span>
+              &larr;
+            </button>
+            <button 
+              [disabled]="currentPage >= totalPages - 1"
+              (click)="onPageChange(currentPage + 1)"
+              class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400">
+              <span class="sr-only">Siguiente</span>
+              &rarr;
+            </button>
+          </nav>
+        </div>
+      </div>
     </div>
   </div>
 </div>
