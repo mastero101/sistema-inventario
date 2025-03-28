@@ -50,7 +50,9 @@ export class InventoryListComponent implements OnInit {
   itemsPerPage: number = 10;
   Math = Math;
 
-  constructor(private inventoryService: InventoryService) {}
+  constructor(
+    private inventoryService: InventoryService,
+  ) {}
 
   ngOnInit(): void {
     this.loadInventory();

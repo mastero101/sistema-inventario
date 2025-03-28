@@ -57,6 +57,20 @@
         </a>
       </li>
 
+            <!-- Inventario -->
+      <li>
+        <a routerLink="/inventoryPaginated" 
+           routerLinkActive="bg-slate-700 text-white font-medium border-l-4 border-blue-500"
+           class="flex items-center space-x-3 p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200 relative group">
+          <i class="fas fa-boxes w-6 text-center"></i>
+          <span [ngClass]="{'hidden': isCollapsed}" class="transition-all duration-200">inventory Paginated</span>
+          <!-- Tooltip para modo colapsado -->
+          <div *ngIf="isCollapsed" class="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+            Inventario
+          </div>
+        </a>
+      </li>
+
       <!-- Separador de categorías -->
       <li class="my-3">
         <div class="border-t border-slate-700 pt-2">

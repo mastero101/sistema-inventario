@@ -1,0 +1,52 @@
+<div class="container">
+  <div *ngIf="isLoading" class="loading">
+    Cargando...
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage" class="inventory-list">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tipo</th>
+          <th>Marca</th>
+          <th>Modelo</th>
+          <th>Serial</th>
+          <th>Estado</th>
+          <th>Ubicación</th>
+          <th>Asignado a</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of inventoryItems">
+          <td>{{ item.id }}</td>
+          <td>{{ item.tipo }}</td>
+          <td>{{ item.marca }}</td>
+          <td>{{ item.modelo }}</td>
+          <td>{{ item.serial }}</td>
+          <td>{{ item.estado }}</td>
+          <td>{{ item.ubicacion }}</td>
+          <td>{{ item.asignadoA }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <button 
+        [disabled]="currentPage === 0"
+        (click)="onPageChange(currentPage - 1)">
+        Anterior
+      </button>
+      <span>Página {{ currentPage + 1 }} de {{ totalPages }}</span>
+      <button 
+        [disabled]="currentPage >= totalPages - 1"
+        (click)="onPageChange(currentPage + 1)">
+        Siguiente
+      </button>
+    </div>
+  </div>
+</div>

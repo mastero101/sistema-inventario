@@ -13,6 +13,12 @@ export const routes: Routes = [
     title: 'Dashboard - Inventario Hospital'
   },
   {
+    path: 'inventoryPaginated',
+    loadComponent: () => import('./components/inventory/inventory-paginated/inventory-paginated.component')
+      .then(m => m.InventoryPaginatedComponent),
+    title: 'Lista de Equipos'
+  },
+  {
     path: 'inventory',
     children: [
       {

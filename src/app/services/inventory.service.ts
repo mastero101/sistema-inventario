@@ -9,7 +9,8 @@ import { environment } from '../../environments/environment';
 export class InventoryService {
   private apiUrl = `${environment.apiUrl}/inventory`;
 
-  constructor() {
+  constructor() 
+  {
     // Configuración global de Axios
     axios.defaults.baseURL = environment.apiUrl;
     axios.defaults.headers.post['Content-Type'] = 'multipart/form-data';
@@ -118,4 +119,5 @@ export class InventoryService {
       console.error('Error inesperado:', error);
     }
   }
+
 }
