@@ -12,25 +12,29 @@
       <thead>
         <tr>
           <th>ID</th>
+          <th>Serial</th>
           <th>Tipo</th>
           <th>Marca</th>
           <th>Modelo</th>
-          <th>Serial</th>
           <th>Estado</th>
           <th>Ubicación</th>
+          <th>Departamento</th>
           <th>Asignado a</th>
+          <th>Fecha Registro</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let item of inventoryItems">
           <td>{{ item.id }}</td>
+          <td>{{ item.serial }}</td>
           <td>{{ item.tipo }}</td>
           <td>{{ item.marca }}</td>
           <td>{{ item.modelo }}</td>
-          <td>{{ item.serial }}</td>
           <td>{{ item.estado }}</td>
           <td>{{ item.ubicacion }}</td>
-          <td>{{ item.asignadoA }}</td>
+          <td>{{ item.departamento }}</td>
+          <td>{{ item.asignadoA || 'No asignado' }}</td>
+          <td>{{ item.fechaRegistro | date:'dd/MM/yyyy' }}</td>
         </tr>
       </tbody>
     </table>

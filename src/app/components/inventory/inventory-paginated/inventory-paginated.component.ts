@@ -34,19 +34,19 @@ export class InventoryPaginatedComponent implements OnInit {
     this.isLoading = true;
     try {
       if (isPlatformBrowser(this.platformId)) {
-        const paginatedResponse = await this.paginatedService.getPaginatedData<InventoryItem>(
-          '/api/inventory/get-paginated',
-          {
-            pageIndex: this.currentPage,
-            pageSize: this.pageSize,
-            sortDirection: 'asc',
-            sortProperty: 'string'
-          }
-        );
+        // Use getPaginatedInventory instead of getPaginatedData
+        const paginatedResponse = await this.paginatedService.getPaginatedInventory({
+          pageIndex: this.currentPage,
+          pageSize: this.pageSize,
+          sortDirection: 'asc',
+          sortProperty: 'string'
+        });
 
         this.inventoryItems = paginatedResponse.content.items;
         this.totalItems = paginatedResponse.content.totalItems;
         this.totalPages = paginatedResponse.content.totalPages;
+        
+        console.log('Mapped inventory items:', this.inventoryItems);
       }
     } catch (error) {
       this.errorMessage = 'Error al cargar el inventario: ' + (error as Error).message;
