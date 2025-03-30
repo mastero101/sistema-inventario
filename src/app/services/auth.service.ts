@@ -85,7 +85,7 @@ export class AuthService {
 
   async login(email: string, password: string): Promise<any> {
     try {
-      const response = await this.axiosInstance.post('/login', 
+      const response = await this.axiosInstance.post('/api/login', 
         JSON.stringify({ email, password }), 
         {
           headers: {
