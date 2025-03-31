@@ -102,20 +102,51 @@ export class InventoryPaginatedComponent implements OnInit {
     this.isLoading = true;
     try {
       if (isPlatformBrowser(this.platformId)) {
+        // Get all data without filters
         const paginatedResponse = await this.paginatedService.getPaginatedInventory({
           pageIndex: this.currentPage,
           pageSize: this.pageSize,
           sortDirection: 'asc',
-          sortProperty: 'string',
-          searchValue: this.searchTerm,
-          itemTypeId: this.selectedType,
-          brandId: this.selectedBrand,
-          statusId: this.selectedStatus
+          sortProperty: 'string'
         });
 
-        this.inventoryItems = paginatedResponse.content.items;
-        this.totalItems = paginatedResponse.content.totalItems;
-        this.totalPages = paginatedResponse.content.totalPages;
+        // Apply filters locally
+        let filteredItems = paginatedResponse.content.items;
+
+        // Apply search filter
+        if (this.searchTerm) {
+          const searchLower = this.searchTerm.toLowerCase();
+          filteredItems = filteredItems.filter(item => 
+            item.serial.toLowerCase().includes(searchLower) ||
+            item.tipo.toLowerCase().includes(searchLower) ||
+            item.marca.toLowerCase().includes(searchLower) ||
+            item.estado.toLowerCase().includes(searchLower) ||
+            (item.asignadoA && item.asignadoA.toLowerCase().includes(searchLower))
+          );
+        }
+
+        // Apply type filter
+        if (this.selectedType > 0) {
+          const selectedTypeValue = this.typeOptions.find(t => t.id === this.selectedType)?.value;
+          filteredItems = filteredItems.filter(item => item.tipo === selectedTypeValue);
+        }
+
+        // Apply brand filter
+        if (this.selectedBrand > 0) {
+          const selectedBrandValue = this.brandOptions.find(b => b.id === this.selectedBrand)?.value;
+          filteredItems = filteredItems.filter(item => item.marca === selectedBrandValue);
+        }
+
+        // Apply status filter
+        if (this.selectedStatus > 0) {
+          const selectedStatusValue = this.statusOptions.find(s => s.id === this.selectedStatus)?.value;
+          filteredItems = filteredItems.filter(item => item.estado === selectedStatusValue);
+        }
+
+        // Update the component properties with filtered data
+        this.inventoryItems = filteredItems;
+        this.totalItems = filteredItems.length;
+        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
       }
     } catch (error) {
       this.errorMessage = 'Error al cargar el inventario: ' + (error as Error).message;
