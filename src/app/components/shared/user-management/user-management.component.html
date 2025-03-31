@@ -38,6 +38,9 @@
         <div *ngIf="isLoading" class="p-4 bg-blue-50 text-blue-700 rounded-lg">
             <i class="fas fa-spinner fa-spin mr-2"></i> Cargando usuarios...
         </div>
+        <div *ngIf="successMessage" class="p-4 bg-green-50 text-green-700 rounded-lg">
+            <i class="fas fa-check-circle mr-2"></i> {{ successMessage }}
+        </div>
         <div *ngIf="errorMessage" class="p-4 bg-red-50 text-red-700 rounded-lg">
             <i class="fas fa-exclamation-circle mr-2"></i> {{ errorMessage }}
         </div>

@@ -47,7 +47,7 @@ export class UserService {
       const response = await this.axiosInstance.get('/api/users');
       return response.data.content;
     } catch (error: any) {
-      throw new Error(error.response?.data?.errors?.[0] || 'Error fetching users');
+      throw new Error(error.response?.data?.errors?.[0]?.message || 'Error fetching users');
     }
   }
 
@@ -57,9 +57,9 @@ export class UserService {
       if (response.data.statusCode === 200) {
         return response.data.content;
       }
-      throw new Error(response.data.errors?.[0] || 'Error creating user');
+      throw new Error(response.data.errors?.[0]?.message || 'Error creating user');
     } catch (error: any) {
-      throw new Error(error.response?.data?.errors?.[0] || 'Error creating user');
+      throw new Error(error.response?.data?.errors?.[0]?.message || 'Error creating user');
     }
   }
 
@@ -69,35 +69,35 @@ export class UserService {
       if (response.data.statusCode === 200) {
         return response.data.content;
       }
-      throw new Error(response.data.errors?.[0] || 'Error updating user status');
+      throw new Error(response.data.errors?.[0]?.message || 'Error updating user status');
     } catch (error: any) {
-      throw new Error(error.response?.data?.errors?.[0] || 'Error updating user status');
+      throw new Error(error.response?.data?.errors?.[0]?.message || 'Error updating user status');
     }
   }
 
   async toggleUserAdmin(userId: number): Promise<boolean> {
-      try {
-        const response = await this.axiosInstance.patch(`/api/users/${userId}/toggle-admin`);
-        if (response.data.statusCode === 200) {
-          return response.data.content;
-        }
-        throw new Error(response.data.errors?.[0] || 'Error updating admin status');
-      } catch (error: any) {
-        throw new Error(error.response?.data?.errors?.[0] || 'Error updating admin status');
+    try {
+      const response = await this.axiosInstance.patch(`/api/users/${userId}/toggle-admin`);
+      if (response.data.statusCode === 200) {
+        return response.data.content;
       }
+      throw new Error(response.data.errors?.[0]?.message || 'Error updating admin status');
+    } catch (error: any) {
+      throw new Error(error.response?.data?.errors?.[0]?.message || 'Error updating admin status');
     }
+  }
 
   async deleteUser(userId: number): Promise<boolean> {
-      try {
-        const response = await this.axiosInstance.delete(`/api/users/${userId}`);
-        if (response.data.statusCode === 200) {
-          return response.data.content;
-        }
-        throw new Error(response.data.errors?.[0] || 'Error deleting user');
-      } catch (error: any) {
-        throw new Error(error.response?.data?.errors?.[0] || 'Error deleting user');
+    try {
+      const response = await this.axiosInstance.delete(`/api/users/${userId}`);
+      if (response.data.statusCode === 200) {
+        return response.data.content;
       }
+      throw new Error(response.data.errors?.[0]?.message || 'Error deleting user');
+    } catch (error: any) {
+      throw new Error(error.response?.data?.errors?.[0]?.message || 'Error deleting user');
     }
+  }
 
   async getUserProfile(userId: number): Promise<any> {
     try {
@@ -115,7 +115,7 @@ export class UserService {
       return response.data.content;
     } catch (error: any) {
       console.error('Error fetching user profile:', error);
-      throw new Error(error.response?.data?.errors || 'Failed to fetch user profile');
+      throw new Error(error.response?.data?.errors?.[0]?.message || 'Failed to fetch user profile');
     }
   }
 
@@ -143,7 +143,7 @@ export class UserService {
       return response.data;
     } catch (error: any) {
       console.error('Error updating profile image:', error);
-      throw new Error(error.response?.data?.errors || 'Failed to update profile image');
+      throw new Error(error.response?.data?.errors?.[0]?.message || 'Failed to update profile image');
     }
   }
 
@@ -166,7 +166,7 @@ export class UserService {
       return response.data;
     } catch (error: any) {
       console.error('Error deleting profile image:', error);
-      throw new Error(error.response?.data?.errors || 'Failed to delete profile image');
+      throw new Error(error.response?.data?.errors?.[0]?.message || 'Failed to delete profile image');
     }
   }
 }

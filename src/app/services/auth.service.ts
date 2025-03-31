@@ -85,7 +85,7 @@ export class AuthService {
 
   async login(email: string, password: string): Promise<any> {
     try {
-      const response = await this.axiosInstance.post('/login', 
+      const response = await this.axiosInstance.post('/api/login', 
         JSON.stringify({ email, password }), 
         {
           headers: {
@@ -97,9 +97,9 @@ export class AuthService {
         this.setSession(response.data.content);
         return response.data;
       }
-      throw new Error(response.data.errors?.[0] || 'Credenciales incorrectas');
+      throw new Error(response.data.errors?.[0]?.message || 'Credenciales incorrectas');
     } catch (error: any) {
-      throw new Error(error.response?.data?.errors?.[0] || 'Error en el servidor');
+      throw new Error(error.response?.data?.errors?.[0]?.message || 'Error en el servidor');
     }
   }
 

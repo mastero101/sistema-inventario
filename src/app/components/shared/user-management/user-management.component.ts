@@ -82,13 +82,19 @@ export class UserManagementComponent implements OnInit {
     this.applyFilters();
   }
 
+  successMessage: string | null = null;  // Add this property
+
   async addUser() {
     try {
       this.isLoading = true;
       this.errorMessage = null;
+      this.successMessage = null;
       
       const createdUser = await this.userService.createUser(this.newUser);
       this.users.push(createdUser);
+      
+      // Set success message
+      this.successMessage = `Usuario ${createdUser.fullName} creado exitosamente. El usuario debe ser activado por un administrador y verificar su correo electrónico.`;
       
       // Reset form
       this.newUser = {
@@ -97,6 +103,8 @@ export class UserManagementComponent implements OnInit {
         password: '',
         passwordConfirmation: ''
       };
+      
+      await this.loadUsers(); // Refresh the list
     } catch (error: any) {
       this.errorMessage = error.message;
     } finally {

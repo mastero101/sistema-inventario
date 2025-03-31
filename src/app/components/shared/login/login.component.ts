@@ -47,8 +47,12 @@ export class LoginComponent {
           window.location.reload();
         });
       }, 500);
-    } catch (error: any) {
-      this.handleError(error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.handleError(error.message);
+      } else {
+        this.handleError('Error desconocido durante el inicio de sesión');
+      }
     } finally {
       this.isLoading = false;
     }
