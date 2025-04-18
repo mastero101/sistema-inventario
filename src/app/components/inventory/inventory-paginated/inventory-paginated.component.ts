@@ -325,15 +325,24 @@ export class InventoryPaginatedComponent implements OnInit {
 
   // Add these properties to the component class
   showDetailsModal: boolean = false;
-  selectedItem: any = null;  // You might want to create a proper interface for this
-
-  // Add this method to close the details modal
-  closeDetailsModal(): void {
-    this.showDetailsModal = false;
-    this.selectedItem = null;
-  }
-
-  // Update showItemDetails method to handle the response data
+  selectedItem: any = null;
+  isEditing: boolean = false;
+  editItem: CreateInventoryRequest = {
+    serialNumber: '',
+    inventoryNumber: '',
+    description: '',
+    assignedTo: '',
+    numberOfCopies: 1,
+    brandId: 0,
+    modelId: 0,
+    itemTypeId: 0,
+    sourceId: 0,
+    assignedAreaId: 0,
+    assignedSubAreaId: 0,
+    statusId: 0
+  };
+  
+  // Update showItemDetails method
   async showItemDetails(id: string | undefined): Promise<void> {
     if (!id) return;
     
@@ -342,10 +351,64 @@ export class InventoryPaginatedComponent implements OnInit {
       const item = await this.paginatedService.getInventoryItemById(id);
       this.selectedItem = item;
       this.showDetailsModal = true;
+      this.isEditing = false;
     } catch (error) {
       this.errorMessage = 'Error al cargar los detalles del item: ' + (error as Error).message;
     } finally {
       this.isLoading = false;
     }
+  }
+  
+  // Add these new methods
+  toggleEditing(): void {
+    this.isEditing = !this.isEditing;
+    if (this.isEditing && this.selectedItem) {
+      // Initialize editItem with current values
+      this.editItem = {
+        // Remove id since it's not part of CreateInventoryRequest interface
+        serialNumber: this.selectedItem.serial,
+        inventoryNumber: this.selectedItem.inventoryNumber,
+        description: this.selectedItem.description || '',
+        assignedTo: this.selectedItem.asignadoA || '',
+        numberOfCopies: 1,
+        brandId: this.selectedItem.brand?.id || 0,
+        modelId: this.selectedItem.model?.id || 0,
+        itemTypeId: this.selectedItem.itemType?.id || 0,
+        sourceId: this.selectedItem.source?.id || 0,
+        assignedAreaId: this.selectedItem.assignedArea?.id || 0,
+        assignedSubAreaId: this.selectedItem.assignedSubArea?.id || 0,
+        statusId: this.selectedItem.status?.id || 0
+      };
+    }
+  }
+  
+  async updateItem(): Promise<void> {
+    try {
+      this.isLoading = true;
+      await this.paginatedService.updateInventoryItem({
+        ...this.editItem,
+        id: this.selectedItem.id
+      });
+      this.isEditing = false;
+      await this.showItemDetails(this.selectedItem.id); // Refresh details
+      await this.loadPaginatedInventory(); // Refresh list
+      this.errorMessage = null;
+    } catch (error) {
+      this.errorMessage = 'Error al actualizar el elemento: ' + (error as Error).message;
+    } finally {
+      this.isLoading = false;
+    }
+  }
+  
+  closeDetailsModal(): void {
+    this.showDetailsModal = false;
+    this.selectedItem = null;
+    this.isEditing = false;
+    this.errorMessage = null;
+  }
+  
+  cancelEditing(): void {
+    this.isEditing = false;
+    this.errorMessage = null;
   }
 }

@@ -101,6 +101,22 @@ interface InventoryItemDetail {
   assignedSubArea: ElementData | null;
 }
 
+interface UpdateInventoryRequest {
+  id: number;
+  serialNumber: string;
+  inventoryNumber: string;
+  description: string;
+  assignedTo?: string;
+  numberOfCopies?: number;
+  brandId: number;
+  modelId: number;
+  itemTypeId: number;
+  sourceId: number;
+  assignedAreaId: number;
+  assignedSubAreaId: number;
+  statusId: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -407,6 +423,58 @@ export class PaginatedService {
     } catch (error: any) {
       console.error('Get Item Detail Error:', error.response?.data || error.message);
       throw new Error(error.response?.data?.errors?.[0] || 'Error fetching inventory item details');
+    }
+  }
+
+  async updateInventoryItem(item: UpdateInventoryRequest): Promise<boolean> {
+    try {
+      // Validate required fields
+      if (!item.id || !item.serialNumber?.trim() || !item.inventoryNumber?.trim()) {
+        throw new Error('ID, número de serie e inventario son requeridos');
+      }
+
+      // Validate required IDs
+      if (!item.brandId || !item.modelId || !item.itemTypeId || 
+          !item.sourceId || !item.assignedAreaId || 
+          !item.assignedSubAreaId || !item.statusId) {
+        throw new Error('Todos los campos de ID son requeridos y deben ser mayores a 0');
+      }
+
+      // Prepare request data with all required fields
+      const requestData = {
+        id: item.id,
+        serialNumber: item.serialNumber.trim(),
+        inventoryNumber: item.inventoryNumber.trim(),
+        description: item.description || '',
+        assignedTo: item.assignedTo || '',
+        numberOfCopies: 1, // Add missing field with default value
+        brandId: item.brandId,
+        modelId: item.modelId,
+        itemTypeId: item.itemTypeId,
+        sourceId: item.sourceId,
+        assignedAreaId: item.assignedAreaId,
+        assignedSubAreaId: item.assignedSubAreaId,
+        statusId: item.statusId
+      };
+
+      console.log('Update Request Data:', requestData);
+
+      const response = await this.axiosInstance.put('/api/inventory', requestData);
+      
+      console.log('Update Response:', {
+        status: response.status,
+        statusCode: response.data.statusCode,
+        content: response.data.content
+      });
+      
+      if (response.data.statusCode === 200) {
+        return true;
+      }
+      
+      throw new Error(response.data.errors?.[0] || 'Error updating inventory item');
+    } catch (error: any) {
+      console.error('Update Error:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.errors?.[0] || 'Error updating inventory item');
     }
   }
 }
