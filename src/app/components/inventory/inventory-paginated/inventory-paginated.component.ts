@@ -360,24 +360,33 @@ export class InventoryPaginatedComponent implements OnInit {
   }
   
   // Add these new methods
+  // Update the toggleEditing method
   toggleEditing(): void {
     this.isEditing = !this.isEditing;
     if (this.isEditing && this.selectedItem) {
+      // Find the corresponding IDs from the options arrays
+      const typeId = this.typeOptions.find(t => t.value === this.selectedItem.tipo)?.id || 0;
+      const brandId = this.brandOptions.find(b => b.value === this.selectedItem.marca)?.id || 0;
+      const modelId = this.modelOptions.find(m => m.value === this.selectedItem.modelo)?.id || 0;
+      const statusId = this.statusOptions.find(s => s.value === this.selectedItem.estado)?.id || 0;
+      const sourceId = this.sourceOptions.find(s => s.value === this.selectedItem.source)?.id || 0;
+      const areaId = this.areaOptions.find(a => a.value === this.selectedItem.ubicacion)?.id || 0;
+      const subAreaId = this.subAreaOptions.find(sa => sa.value === this.selectedItem.subArea)?.id || 0;
+  
       // Initialize editItem with current values
       this.editItem = {
-        // Remove id since it's not part of CreateInventoryRequest interface
         serialNumber: this.selectedItem.serial,
         inventoryNumber: this.selectedItem.inventoryNumber,
         description: this.selectedItem.description || '',
         assignedTo: this.selectedItem.asignadoA || '',
         numberOfCopies: 1,
-        brandId: this.selectedItem.brand?.id || 0,
-        modelId: this.selectedItem.model?.id || 0,
-        itemTypeId: this.selectedItem.itemType?.id || 0,
-        sourceId: this.selectedItem.source?.id || 0,
-        assignedAreaId: this.selectedItem.assignedArea?.id || 0,
-        assignedSubAreaId: this.selectedItem.assignedSubArea?.id || 0,
-        statusId: this.selectedItem.status?.id || 0
+        brandId: brandId,
+        modelId: modelId,
+        itemTypeId: typeId,
+        sourceId: sourceId,
+        assignedAreaId: areaId,
+        assignedSubAreaId: subAreaId,
+        statusId: statusId
       };
     }
   }
