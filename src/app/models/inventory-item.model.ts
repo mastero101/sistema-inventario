@@ -4,8 +4,12 @@ export interface InventoryItem {
   marca: string;
   modelo: string;
   serial: string;
+  source: string;
+  description: string;
+  inventoryNumber: string;
   estado: 'Disponible' | 'Asignado' | 'Mantenimiento' | 'Dañado';
   asignadoA?: string;
+  assignedSubArea?: string;
   ubicacion: string;
   fechaRegistro: string; // ISO 8601 format (YYYY-MM-DD)
   ultimoMantenimiento?: string; // ISO 8601 format (YYYY-MM-DD)

@@ -414,78 +414,103 @@
 
 <!-- Details/Edit Modal -->
 <div *ngIf="showDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-  <div class="relative mx-auto w-full max-w-2xl rounded-lg bg-white shadow-2xl">
-    <div class="p-6">
-      <div class="flex justify-between items-center border-b pb-4 mb-5">
-        <h3 class="text-xl font-bold text-gray-900">{{ isEditing ? 'Editar Item' : 'Detalles del Item' }}</h3>
+  <div class="relative mx-auto w-full max-w-4xl rounded-xl bg-white shadow-2xl transform transition-all">
+    <!-- Header with improved styling -->
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex justify-between items-center">
+        <h3 class="text-2xl font-bold text-gray-900 flex items-center">
+          <span class="mr-3">{{ isEditing ? 'Editar Item' : 'Detalles del Item' }}</span>
+          <span *ngIf="!isEditing" 
+                [class]="'inline-flex px-3 py-1 text-sm font-semibold rounded-full ' + getStatusClass(selectedItem?.estado)">
+            {{selectedItem?.estado}}
+          </span>
+        </h3>
         <button 
           type="button"
           (click)="closeDetailsModal()"
-          class="text-gray-400 hover:text-gray-500 transition-colors duration-200">
+          class="text-gray-400 hover:text-gray-500 transition-colors duration-200 p-2 rounded-full hover:bg-gray-100">
           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
+    </div>
 
-      <!-- Error message -->
-      <div *ngIf="errorMessage" class="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded">
-        <p class="text-sm">{{ errorMessage }}</p>
+    <div class="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+      <!-- Error message with improved visibility -->
+      <div *ngIf="errorMessage" 
+           class="mb-6 bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-sm">
+        <div class="flex">
+          <svg class="h-5 w-5 text-red-400 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+          <p class="text-sm font-medium">{{ errorMessage }}</p>
+        </div>
       </div>
 
       <!-- Edit Form -->
-      <form *ngIf="isEditing" (ngSubmit)="updateItem()" class="space-y-6">
+      <form *ngIf="isEditing" (ngSubmit)="updateItem()" class="space-y-8">
         <!-- Basic Information -->
-        <div class="bg-gray-50 rounded-lg p-4">
-          <h4 class="text-lg font-semibold text-gray-700 mb-4">Información Básica</h4>
-          <div class="grid grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <h4 class="text-lg font-semibold text-gray-900 mb-5 flex items-center">
+            <svg class="h-5 w-5 text-gray-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+            </svg>
+            Información Básica
+          </h4>
+          <div class="grid grid-cols-2 gap-6">
             <div>
-              <label class="text-sm font-medium text-gray-500">Serial</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Serial</label>
               <input type="text" [(ngModel)]="editItem.serialNumber" name="serialNumber" 
-                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                     class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
             <div>
-              <label class="text-sm font-medium text-gray-500">Número de Inventario</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Número de Inventario</label>
               <input type="text" [(ngModel)]="editItem.inventoryNumber" name="inventoryNumber" 
-                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                     class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
             <div class="col-span-2">
-              <label class="text-sm font-medium text-gray-500">Descripción</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
               <textarea [(ngModel)]="editItem.description" name="description" rows="3"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                      class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
             </div>
           </div>
         </div>
 
-        <!-- Categories -->
-        <div class="bg-gray-50 rounded-lg p-4">
-          <h4 class="text-lg font-semibold text-gray-700 mb-4">Categorías</h4>
+        <!-- Categories with visual improvements -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <h4 class="text-lg font-semibold text-gray-900 mb-5 flex items-center">
+            <svg class="h-5 w-5 text-gray-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+            </svg>
+            Categorías
+          </h4>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="text-sm font-medium text-gray-500">Tipo</label>
+              <label class="block text-sm font-medium text-gray-700">Tipo</label>
               <select [(ngModel)]="editItem.itemTypeId" name="itemTypeId"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                      class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <option *ngFor="let type of typeOptions" [value]="type.id">{{type.value}}</option>
               </select>
             </div>
             <div>
-              <label class="text-sm font-medium text-gray-500">Marca</label>
+              <label class="block text-sm font-medium text-gray-700">Marca</label>
               <select [(ngModel)]="editItem.brandId" name="brandId"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                      class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <option *ngFor="let brand of brandOptions" [value]="brand.id">{{brand.value}}</option>
               </select>
             </div>
             <div>
-              <label class="text-sm font-medium text-gray-500">Modelo</label>
+              <label class="block text-sm font-medium text-gray-700">Modelo</label>
               <select [(ngModel)]="editItem.modelId" name="modelId"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                      class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <option *ngFor="let model of modelOptions" [value]="model.id">{{model.value}}</option>
               </select>
             </div>
             <div>
-              <label class="text-sm font-medium text-gray-500">Estado</label>
+              <label class="block text-sm font-medium text-gray-700">Estado</label>
               <select [(ngModel)]="editItem.statusId" name="statusId"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                      class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <option *ngFor="let status of statusOptions" [value]="status.id">{{status.value}}</option>
               </select>
             </div>
@@ -493,58 +518,78 @@
         </div>
 
         <!-- Location -->
-        <div class="bg-gray-50 rounded-lg p-4">
-          <h4 class="text-lg font-semibold text-gray-700 mb-4">Ubicación y Asignación</h4>
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <h4 class="text-lg font-semibold text-gray-900 mb-5 flex items-center">
+            <svg class="h-5 w-5 text-gray-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+            </svg>
+            Información Básica
+          </h4>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="text-sm font-medium text-gray-500">Origen</label>
+              <label class="block text-sm font-medium text-gray-700">Origen</label>
               <select [(ngModel)]="editItem.sourceId" name="sourceId"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                      class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <option *ngFor="let source of sourceOptions" [value]="source.id">{{source.value}}</option>
               </select>
             </div>
             <div>
-              <label class="text-sm font-medium text-gray-500">Área</label>
+              <label class="block text-sm font-medium text-gray-700">Área</label>
               <select [(ngModel)]="editItem.assignedAreaId" name="assignedAreaId"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                      class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <option *ngFor="let area of areaOptions" [value]="area.id">{{area.value}}</option>
               </select>
             </div>
             <div>
-              <label class="text-sm font-medium text-gray-500">Sub Área</label>
+              <label class="block text-sm font-medium text-gray-700">Sub Área</label>
               <select [(ngModel)]="editItem.assignedSubAreaId" name="assignedSubAreaId"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                      class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <option *ngFor="let subArea of subAreaOptions" [value]="subArea.id">{{subArea.value}}</option>
               </select>
             </div>
             <div>
-              <label class="text-sm font-medium text-gray-500">Asignado a</label>
-              <input type="text" [(ngModel)]="editItem.assignedTo" name="assignedTo" 
-                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+              <label class="block text-sm font-medium text-gray-700">Asignado a</label>
+              <input type="text" [(ngModel)]="editItem.assignedTo" name="assignedTo"
+                     class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
           </div>
         </div>
 
         <!-- Form buttons -->
-        <div class="flex justify-end gap-3 pt-5">
-          <button type="button" 
-                  (click)="cancelEditing()"
-                  class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 border border-gray-300 transition-colors duration-200">
-            Cancelar
-          </button>
-          <button type="submit"
-                  [disabled]="isLoading"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200">
-            {{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}
-          </button>
+        <div class="sticky bottom-0 bg-white px-6 py-4 border-t border-gray-200 mt-8 -mx-6">
+          <div class="flex justify-end gap-4">
+            <button type="button" 
+                    (click)="cancelEditing()"
+                    class="px-6 py-2.5 bg-white text-gray-700 rounded-lg hover:bg-gray-50 border border-gray-300 
+                           transition-colors duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+              Cancelar
+            </button>
+            <button type="submit"
+                    [disabled]="isLoading"
+                    class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+                           disabled:opacity-50 transition-colors duration-200 font-medium
+                           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                           flex items-center">
+              <svg *ngIf="isLoading" class="animate-spin -ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}
+            </button>
+          </div>
         </div>
       </form>
 
-      <!-- Read-only view -->
-      <div *ngIf="!isEditing && selectedItem" class="space-y-6">
-        <!-- Display the item details here -->
-        <div class="bg-gray-50 rounded-lg p-4">
-          <h4 class="text-lg font-semibold text-gray-700 mb-4">Información Básica</h4>
+      <!-- Read-only view with enhanced styling -->
+      <div *ngIf="!isEditing && selectedItem" class="space-y-8">
+        <!-- Similar card styling for each section -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <h4 class="text-lg font-semibold text-gray-900 mb-5 flex items-center">
+            <svg class="h-5 w-5 text-gray-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+            </svg>
+            Información Básica
+          </h4>
           <dl class="grid grid-cols-2 gap-4">
             <div>
               <dt class="text-sm font-medium text-gray-500">Serial</dt>
@@ -562,8 +607,13 @@
         </div>
 
         <!-- Categories -->
-        <div class="bg-gray-50 rounded-lg p-4">
-          <h4 class="text-lg font-semibold text-gray-700 mb-4">Categorías</h4>
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <h4 class="text-lg font-semibold text-gray-900 mb-5 flex items-center">
+            <svg class="h-5 w-5 text-gray-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+            </svg>
+            Categorías
+          </h4>
           <dl class="grid grid-cols-2 gap-4">
             <div>
               <dt class="text-sm font-medium text-gray-500">Tipo</dt>
@@ -572,6 +622,10 @@
             <div>
               <dt class="text-sm font-medium text-gray-500">Marca</dt>
               <dd class="mt-1 text-sm text-gray-900">{{selectedItem.marca}}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Modelo</dt>
+              <dd class="mt-1 text-sm text-gray-900">{{selectedItem.modelo}}</dd>
             </div>
             <div>
               <dt class="text-sm font-medium text-gray-500">Estado</dt>
@@ -585,12 +639,25 @@
         </div>
 
         <!-- Location -->
-        <div class="bg-gray-50 rounded-lg p-4">
-          <h4 class="text-lg font-semibold text-gray-700 mb-4">Ubicación y Asignación</h4>
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <h4 class="text-lg font-semibold text-gray-900 mb-5 flex items-center">
+            <svg class="h-5 w-5 text-gray-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+            </svg>
+            Información Básica
+          </h4>
           <dl class="grid grid-cols-2 gap-4">
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Origen</dt>
+              <dd class="mt-1 text-sm text-gray-900">{{selectedItem.source}}</dd>
+            </div>
             <div>
               <dt class="text-sm font-medium text-gray-500">Ubicación</dt>
               <dd class="mt-1 text-sm text-gray-900">{{selectedItem.ubicacion}}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Sub Área</dt>
+              <dd class="mt-1 text-sm text-gray-900">{{selectedItem.subArea}}</dd>
             </div>
             <div>
               <dt class="text-sm font-medium text-gray-500">Asignado a</dt>
@@ -599,13 +666,20 @@
           </dl>
         </div>
 
-        <!-- Edit button -->
-        <div class="flex justify-end pt-5">
-          <button
-            (click)="toggleEditing()"
-            class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors duration-200">
-            Editar
-          </button>
+        <!-- Edit button with improved positioning -->
+        <div class="sticky bottom-0 bg-white px-6 py-4 border-t border-gray-200 mt-8 -mx-6">
+          <div class="flex justify-end">
+            <button
+              (click)="toggleEditing()"
+              class="px-6 py-2.5 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 
+                     transition-colors duration-200 font-medium flex items-center
+                     focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+              <svg class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+              </svg>
+              Editar
+            </button>
+          </div>
         </div>
       </div>
     </div>
