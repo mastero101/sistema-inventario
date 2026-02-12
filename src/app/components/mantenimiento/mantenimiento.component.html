@@ -1,0 +1,245 @@
+<div class="container mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight flex items-center">
+        <i class="fas fa-tools mr-3 text-amber-500"></i>
+        Gestión de Mantenimiento
+      </h1>
+      <p class="text-slate-500 mt-1">Equipos en reparación o fuera de servicio</p>
+    </div>
+    
+    <div class="relative w-full md:w-96">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm"
+        placeholder="Buscar equipo en mantenimiento..."
+        class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all shadow-sm"
+      >
+      <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-20">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mb-4"></div>
+    <p class="text-slate-500 font-medium">Cargando registros de mantenimiento...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage" class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg mb-6 flex items-center">
+    <i class="fas fa-exclamation-triangle text-red-500 mr-3 text-xl"></i>
+    <p class="text-red-700 font-medium">{{errorMessage}}</p>
+  </div>
+
+  <!-- Dashboard de Mantenimiento -->
+  <div *ngIf="!isLoading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div *ngFor="let item of filteredItems" 
+         class="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col">
+      
+      <!-- Top Bar / Status -->
+      <div [class]="item.estado === 'Dañado' ? 'bg-red-500' : 'bg-amber-500'" class="h-2 w-full"></div>
+      
+      <div class="p-6 flex-1 flex flex-col">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <span [class]="'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ' + getStatusClass(item.estado)">
+              {{item.estado}}
+            </span>
+            <h3 class="text-xl font-bold text-slate-800 mt-2">{{item.marca}} {{item.modelo}}</h3>
+            <p class="text-xs text-slate-400 font-mono">{{item.serial}}</p>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-xl">
+            <i [class]="item.estado === 'Dañado' ? 'fas fa-exclamation-circle text-red-400' : 'fas fa-wrench text-amber-400'" class="text-2xl"></i>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-4 mb-6 space-y-3">
+          <div class="flex items-center text-sm">
+            <span class="text-slate-400 w-24">Ubicación:</span>
+            <span class="text-slate-700 font-medium">{{item.ubicacion}}</span>
+          </div>
+          <div class="flex items-center text-sm">
+            <span class="text-slate-400 w-24">Responsable:</span>
+            <span class="text-slate-700 font-medium">{{item.asignadoA || 'N/A'}}</span>
+          </div>
+          <div class="flex flex-col text-sm pt-2 border-t border-slate-100">
+            <span class="text-slate-400 mb-1">Motivo/Descripción:</span>
+            <p class="text-slate-600 text-xs italic">{{item.description || 'Sin descripción detallada'}}</p>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button (click)="returnToOperation(item)"
+                  class="flex-1 py-2.5 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center">
+            <i class="fas fa-check-circle mr-2"></i>
+            Alta Operativa
+          </button>
+          <button (click)="openReportModal(item)"
+                  title="Agregar reporte de mantenimiento"
+                  class="px-4 py-2.5 bg-amber-100 text-amber-600 font-bold rounded-xl hover:bg-amber-200 transition-colors">
+            <i class="fas fa-file-medical text-lg"></i>
+          </button>
+          <button (click)="openHistoryModal(item)"
+                  title="Ver historial de mantenimiento"
+                  class="px-4 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors">
+            <i class="fas fa-history text-lg"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Historial de Mantenimiento -->
+  <div *ngIf="showHistoryModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+      <!-- Header -->
+      <div class="bg-slate-800 p-6 flex justify-between items-center text-white">
+        <div>
+          <h3 class="text-xl font-bold">Historial de Mantenimiento</h3>
+          <p class="text-slate-400 text-sm">{{selectedItemForHistory?.marca}} {{selectedItemForHistory?.modelo}} ({{selectedItemForHistory?.serial}})</p>
+        </div>
+        <button (click)="closeHistoryModal()" class="text-slate-400 hover:text-white transition-colors">
+          <i class="fas fa-times text-2xl"></i>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="p-6 max-h-[70vh] overflow-y-auto">
+        <div *ngIf="maintenanceHistory.length === 0" class="text-center py-10 text-slate-500">
+          <i class="fas fa-folder-open text-4xl mb-3 opacity-20"></i>
+          <p>No se encontraron reportes anteriores para este equipo.</p>
+        </div>
+
+        <div class="space-y-6">
+          <div *ngFor="let report of maintenanceHistory" class="relative pl-8 border-l-2 border-slate-100 pb-2">
+            <!-- Timeline Dot -->
+            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 border-white shadow-sm"
+                 [class]="report.tipo_mantenimiento === 'Correctivo' ? 'bg-red-500' : 'bg-blue-500'"></div>
+            
+            <div class="bg-slate-50 rounded-2xl p-4 hover:shadow-md transition-shadow">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{report.fecha | date:'mediumDate'}}</span>
+                  <span [class]="report.tipo_mantenimiento === 'Correctivo' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'" 
+                        class="px-2 py-0.5 rounded text-[10px] font-bold uppercase">
+                    {{report.tipo_mantenimiento}}
+                  </span>
+                </div>
+                <div class="text-sm font-bold text-slate-700">
+                  <i class="fas fa-user-cog text-slate-300 mr-2"></i>{{report.tecnico}}
+                </div>
+              </div>
+
+              <div class="text-slate-800 font-medium mb-2">{{report.descripcion}}</div>
+              
+              <div *ngIf="report.notas" class="text-slate-500 text-sm italic bg-white p-3 rounded-xl border border-dashed border-slate-200 mb-3">
+                "{{report.notas}}"
+              </div>
+
+              <div class="flex justify-between items-center text-xs text-slate-400">
+                <div *ngIf="report.costo" class="text-green-600 font-bold">
+                  Costo: ${{report.costo | number:'1.2-2'}}
+                </div>
+                <div class="ml-auto italic">ID Reporte: #{{report.id}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+        <button (click)="printHistory()" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors flex items-center">
+          <i class="fas fa-file-pdf mr-2"></i>
+          Descargar PDF
+        </button>
+        <button (click)="closeHistoryModal()" class="px-6 py-2.5 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition-colors">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Reporte de Mantenimiento -->
+  <div *ngIf="showReportModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-300">
+      <!-- Header -->
+      <div class="bg-amber-500 p-6 flex justify-between items-center text-white">
+        <div>
+          <h3 class="text-xl font-bold">Reporte de Mantenimiento</h3>
+          <p class="text-amber-100 text-sm">{{selectedItemForReport?.marca}} {{selectedItemForReport?.modelo}}</p>
+        </div>
+        <button (click)="closeReportModal()" class="text-white/80 hover:text-white transition-colors">
+          <i class="fas fa-times text-2xl"></i>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <div class="p-6">
+        <form (ngSubmit)="saveReport()" class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tipo de Mantenimiento</label>
+              <select [(ngModel)]="newReport.tipo_mantenimiento" name="tipo" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 outline-none">
+                <option value="Correctivo">Correctivo</option>
+                <option value="Preventivo">Preventivo</option>
+                <option value="Calibración">Calibración</option>
+                <option value="Garantía">Garantía</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Fecha</label>
+              <input type="date" name="fecha" [(ngModel)]="newReport.fecha" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Técnico Responsable *</label>
+            <input type="text" [(ngModel)]="newReport.tecnico" name="tecnico" placeholder="Nombre completo" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Descripción del Trabajo *</label>
+            <textarea [(ngModel)]="newReport.descripcion" name="descripcion" rows="3" placeholder="¿Qué se le hizo al equipo?" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 outline-none resize-none"></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Costo (Opcional)</label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                <input type="number" [(ngModel)]="newReport.costo" name="costo" class="w-full pl-8 pr-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 outline-none">
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Notas Adicionales</label>
+            <textarea [(ngModel)]="newReport.notas" name="notas" rows="2" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 outline-none resize-none"></textarea>
+          </div>
+
+          <div class="flex gap-3 pt-4">
+            <button type="button" (click)="closeReportModal()" class="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 transition-colors">
+              Cancelar
+            </button>
+            <button type="submit" [disabled]="isLoading" class="flex-1 py-3 bg-amber-500 text-white font-bold rounded-2xl hover:bg-amber-600 disabled:opacity-50 shadow-lg shadow-amber-200 transition-all">
+              <span *ngIf="!isLoading">Guardar Reporte</span>
+              <span *ngIf="isLoading"><i class="fas fa-spinner fa-spin mr-2"></i>Guardando...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredItems.length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
+    <div class="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mb-6">
+      <i class="fas fa-clipboard-check text-4xl text-green-400"></i>
+    </div>
+    <h3 class="text-2xl font-bold text-slate-800">Todo en orden</h3>
+    <p class="text-slate-500 mt-2">No hay equipos reportados en mantenimiento o dañados actualmente.</p>
+  </div>
+</div>
+

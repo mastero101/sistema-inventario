@@ -1,211 +1,242 @@
-<div class="p-4 sm:p-6">
-  <!-- Encabezado -->
-  <div class="mb-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-      <div class="mb-4 sm:mb-0">
-        <h1 class="text-xl sm:text-2xl font-bold text-slate-800">Inventario</h1>
-        <p class="text-sm text-slate-600">Gestión de equipos y dispositivos</p>
-      </div>
-      <!-- Botones apilados en móvil, en línea en desktop -->
-      <div class="flex flex-col sm:flex-row gap-2">
-        <button (click)="exportToExcel()" 
-                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center">
-          <i class="fas fa-file-excel mr-2"></i>
-          <span>Exportar</span>
-        </button>
-        <button (click)="openNewItemModal()" 
-                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
-          <i class="fas fa-plus mr-2"></i>
-          <span>Nuevo Equipo</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Filtros - Apilados en móvil -->
-  <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
-    <div class="flex flex-col gap-4">
-      <!-- Búsqueda -->
-      <div class="relative">
-        <input 
-          type="text" 
-          [(ngModel)]="searchTerm"
-          placeholder="Buscar equipo..."
-          class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-        <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-      </div>
-
-      <!-- Filtros en columna para móvil -->
-      <!-- Add loading and error states at the top -->
-      <div *ngIf="isLoading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-lg shadow-xl flex items-center space-x-3">
-          <i class="fas fa-spinner fa-spin text-blue-600"></i>
-          <span>Cargando...</span>
-        </div>
-      </div>
-      
-      <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-        {{ errorMessage }}
-        <button (click)="errorMessage = null" class="absolute top-0 bottom-0 right-0 px-4 py-3">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      
-      <select 
-        [(ngModel)]="selectedFilter"
-        class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="todos">Todos los estados</option>
-        <option value="disponible">Disponible</option>
-        <option value="asignado">Asignado</option>
-        <option value="mantenimiento">En Mantenimiento</option>
-        <option value="danado">Dañado</option>
-      </select>
-
-      <select 
-        [(ngModel)]="selectedDepartamento"
-        class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="todos">Todos los departamentos</option>
-        <option value="Desarrollo">Desarrollo</option>
-        <option value="TI">TI</option>
-        <option value="Contabilidad">Contabilidad</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- Lista de Inventario -->
-  <div class="bg-white rounded-lg shadow-sm border border-slate-200">
-    <!-- Vista móvil: Cards -->
-    <div class="block sm:hidden">
-      <div *ngFor="let item of paginatedItems" 
-           class="p-4 border-b border-slate-200 last:border-b-0">
-        <div class="flex justify-between items-start mb-2">
-          <div>
-            <div class="font-medium text-slate-900">{{item.marca}} {{item.modelo}}</div>
-            <div class="text-sm text-slate-500">{{item.tipo}}</div>
-          </div>
-          <span [ngClass]="{
-            'bg-green-100 text-green-800': item.estado === 'Disponible',
-            'bg-blue-100 text-blue-800': item.estado === 'Asignado',
-            'bg-yellow-100 text-yellow-800': item.estado === 'Mantenimiento',
-            'bg-red-100 text-red-800': item.estado === 'Dañado'
-          }" class="px-2 py-1 text-xs rounded-full">
-            {{item.estado}}
-          </span>
-        </div>
-        
-        <div class="space-y-2 mb-3">
-          <div class="flex justify-between text-sm">
-            <span class="text-slate-500">Serial:</span>
-            <span>{{item.serial}}</span>
-          </div>
-          <div class="flex justify-between text-sm">
-            <span class="text-slate-500">Asignado a:</span>
-            <span>{{item.asignadoA || '-'}}</span>
-          </div>
-          <div class="flex justify-between text-sm">
-            <span class="text-slate-500">Ubicación:</span>
-            <span>{{item.ubicacion}}</span>
-          </div>
-        </div>
-
-        <div class="flex justify-end space-x-4">
-          <button (click)="openEditModal(item)" class="text-blue-600">
-            <i class="fas fa-edit"></i>
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6 bg-white rounded-lg shadow-md overflow-hidden">
+    <!-- Header section -->
+    <div class="border-b p-5">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
+        <h2 class="text-xl font-bold text-gray-800">Inventario</h2>
+        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <button
+            (click)="exportToExcel()"
+            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center justify-center transition-colors duration-200 shadow-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+            Exportar
           </button>
-          <button (click)="confirmDelete(item)" class="text-red-600">
-            <i class="fas fa-trash"></i>
-          </button>
-          <button (click)="openDetailsModal(item)" class="text-green-600">
-            <i class="fas fa-eye"></i>
+          <button
+            (click)="openNewItemModal()"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center justify-center transition-colors duration-200 shadow-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+            </svg>
+            Nuevo Equipo
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Vista desktop: Tabla -->
-    <div class="hidden sm:block overflow-x-auto">
-      <table class="min-w-full divide-y divide-slate-200">
-        <thead class="bg-slate-50">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Equipo</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Serial</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Estado</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Asignado a</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Ubicación</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Departamento</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-slate-200">
-          <tr *ngFor="let item of paginatedItems">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{item.id}}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm font-medium text-slate-900">{{item.marca}} {{item.modelo}}</div>
-              <div class="text-sm text-slate-500">{{item.tipo}}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{item.serial}}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span [ngClass]="{
-                'bg-green-100 text-green-800': item.estado === 'Disponible',
-                'bg-blue-100 text-blue-800': item.estado === 'Asignado',
-                'bg-yellow-100 text-yellow-800': item.estado === 'Mantenimiento',
-                'bg-red-100 text-red-800': item.estado === 'Dañado'
-              }" class="px-2 py-1 text-xs rounded-full">
-                {{item.estado}}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-              {{item.asignadoA || '-'}}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-              {{item.ubicacion}}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-              {{item.departamento}}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <div class="flex justify-end space-x-3">
-                <button (click)="openEditModal(item)" class="text-blue-600 hover:text-blue-900">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button (click)="confirmDelete(item)" class="text-red-600 hover:text-red-900">
-                  <i class="fas fa-trash"></i>
-                </button>
-                <button (click)="openDetailsModal(item)" class="text-green-600 hover:text-green-900">
-                  <i class="fas fa-eye"></i>
-                </button>
+    <!-- Search and filters -->
+    <div class="p-5 border-b bg-gray-50">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <!-- Búsqueda -->
+        <div class="col-span-1 md:col-span-2 lg:col-span-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              [(ngModel)]="searchTerm"
+              (keyup.enter)="searchInventory()"
+              placeholder="Serial, marca, modelo..."
+              class="pl-10 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+            >
+          </div>
+        </div>
+
+        <!-- Estado filter -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+          <select
+            [(ngModel)]="selectedFilter"
+            (change)="searchInventory()"
+            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+          >
+            <option value="todos">Todos los estados</option>
+            <option *ngFor="let estado of estadoOptions" [value]="estado">{{estado}}</option>
+          </select>
+        </div>
+
+        <!-- Departamento filter -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+          <select
+            [(ngModel)]="selectedDepartamento"
+            (change)="searchInventory()"
+            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+          >
+            <option value="todos">Todos los departamentos</option>
+            <option *ngFor="let dep of departamentoOptions" [value]="dep">{{dep}}</option>
+          </select>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex gap-2">
+          <button (click)="searchInventory()" 
+                  class="flex-1 bg-slate-800 text-white px-4 py-2 rounded-md hover:bg-slate-900 transition-colors text-sm font-bold shadow-sm">
+            <i class="fas fa-filter mr-2"></i>Filtrar
+          </button>
+          <button (click)="resetFilters()" 
+                  title="Limpiar filtros"
+                  class="bg-white border border-gray-300 text-gray-600 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors text-sm shadow-sm">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content area -->
+    <div class="p-5">
+      <!-- Loading spinner -->
+      <div *ngIf="isLoading" class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+
+      <!-- Error message -->
+      <div *ngIf="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm">{{ errorMessage }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table content -->
+      <div *ngIf="!isLoading">
+        <!-- Mobile view: Cards -->
+        <div class="block md:hidden space-y-4">
+          <div *ngFor="let item of paginatedItems" class="bg-white rounded-lg border shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div class="text-sm font-medium text-gray-500">Equipo:</div>
+              <div class="text-sm font-semibold text-gray-900">{{item.marca}} {{item.modelo}}</div>
+              
+              <div class="text-sm font-medium text-gray-500">Tipo:</div>
+              <div class="text-sm text-gray-700">{{item.tipo}}</div>
+              
+              <div class="text-sm font-medium text-gray-500">Serial:</div>
+              <div class="text-sm font-mono text-xs bg-gray-50 px-1 rounded">{{item.serial}}</div>
+              
+              <div class="text-sm font-medium text-gray-500">Estado:</div>
+              <div>
+                <span [class]="'inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ' + getStatusClass(item.estado)">
+                  {{item.estado}}
+                </span>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Paginación -->
-    <div class="px-4 py-3 border-t border-slate-200">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div class="text-sm text-slate-600 mb-3 sm:mb-0">
-          Mostrando {{(currentPage-1)*itemsPerPage + 1}} - 
-          {{Math.min(currentPage*itemsPerPage, filteredItems.length)}} 
-          de {{filteredItems.length}} resultados
+            </div>
+            
+            <div class="flex justify-end gap-2 pt-3 border-t">
+              <button (click)="openDetailsModal(item)" class="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button (click)="openEditModal(item)" class="p-2 text-amber-600 hover:bg-amber-50 rounded-full transition-colors">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button (click)="confirmDelete(item)" class="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="flex justify-end space-x-2">
-          <button (click)="previousPage()" 
-                  [disabled]="currentPage === 1"
-                  [class.opacity-50]="currentPage === 1"
-                  class="px-3 py-1 border border-slate-200 rounded">
-            Anterior
-          </button>
-          <button (click)="nextPage()" 
-                  [disabled]="currentPage === totalPages"
-                  [class.opacity-50]="currentPage === totalPages"
-                  class="px-3 py-1 border border-slate-200 rounded">
-            Siguiente
-          </button>
+
+        <!-- Desktop view: Table -->
+        <div class="hidden md:block overflow-x-auto rounded-lg border border-gray-200">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Equipo</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serial</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Depto</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let item of paginatedItems" class="hover:bg-gray-50 transition-colors duration-150">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{item.id}}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-semibold text-gray-900">{{item.marca}}</div>
+                  <div class="text-xs text-gray-500">{{item.modelo}}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-xs font-mono text-gray-600">{{item.serial}}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span [class]="'inline-flex px-2 py-1 text-xs font-semibold rounded-full ' + getStatusClass(item.estado)">
+                    {{item.estado}}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{item.ubicacion}}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{item.departamento}}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex justify-end space-x-2">
+                    <button (click)="openDetailsModal(item)" title="Ver detalles" class="text-blue-600 hover:text-blue-800 p-1">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button (click)="openEditModal(item)" title="Editar" class="text-amber-600 hover:text-amber-800 p-1">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button (click)="confirmDelete(item)" title="Eliminar" class="text-red-600 hover:text-red-800 p-1">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="paginatedItems.length === 0">
+                <td colspan="7" class="px-6 py-10 text-center text-gray-500">
+                   No se encontraron equipos con los filtros seleccionados
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="px-4 py-4 flex items-center justify-between border-t border-gray-200 mt-4">
+          <div class="flex-1 flex justify-between sm:hidden">
+            <button (click)="previousPage()" [disabled]="currentPage === 1"
+              class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+              Anterior
+            </button>
+            <button (click)="nextPage()" [disabled]="currentPage === totalPages"
+              class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+              Siguiente
+            </button>
+          </div>
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Mostrando página <span class="font-medium">{{ currentPage }}</span> de <span class="font-medium">{{ totalPages }}</span>
+                <span class="text-gray-400 mx-2">|</span>
+                Total: <span class="font-medium">{{ filteredItems.length }}</span> resultados
+              </p>
+            </div>
+            <div>
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                <button (click)="previousPage()" [disabled]="currentPage === 1"
+                  class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50">
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <button (click)="nextPage()" [disabled]="currentPage === totalPages"
+                  class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50">
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </nav>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -215,74 +246,125 @@
 <!-- Mantener los modales existentes -->
 
   <!-- Modal de Nuevo Equipo -->
-  <div *ngIf="showNewItemModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
-      <div class="p-4 border-b border-slate-200">
-        <h3 class="text-lg font-medium">Nuevo Equipo</h3>
+  <div *ngIf="showNewItemModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col my-auto">
+      <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 rounded-t-lg">
+        <h3 class="text-lg font-bold text-slate-800">Registrar Nuevo Equipo</h3>
+        <button (click)="closeNewItemModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fas fa-times text-xl"></i>
+        </button>
       </div>
-      <div class="p-4">
-        <!-- Inside the New Item Modal form -->
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-slate-700">Tipo</label>
-            <select [(ngModel)]="newItem.tipo" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md">
-              <option value="">Seleccione un tipo</option>
-              <option *ngFor="let tipo of tipoOptions" [value]="tipo">{{tipo}}</option>
-            </select>
+      
+      <div class="p-6 overflow-y-auto max-h-[70vh]">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Columna 1 -->
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Tipo *</label>
+              <select [(ngModel)]="newItem.tipo" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="">Seleccione un tipo</option>
+                <option *ngFor="let tipo of tipoOptions" [value]="tipo">{{tipo}}</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Marca *</label>
+              <select [(ngModel)]="newItem.marca" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="">Seleccione una marca</option>
+                <option *ngFor="let marca of marcaOptions" [value]="marca">{{marca}}</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Modelo *</label>
+              <input type="text" [(ngModel)]="newItem.modelo" placeholder="Ej. Inspiron 15" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Serial / S/N *</label>
+              <input type="text" [(ngModel)]="newItem.serial" placeholder="Serial único" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">No. Inventario</label>
+              <input type="text" [(ngModel)]="newItem.inventoryNumber" placeholder="Código interno" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-700">Marca</label>
-            <select [(ngModel)]="newItem.marca" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md">
-              <option value="">Seleccione una marca</option>
-              <option *ngFor="let marca of marcaOptions" [value]="marca">{{marca}}</option>
-            </select>
+
+          <!-- Columna 2 -->
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Estado *</label>
+              <select [(ngModel)]="newItem.estado" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="Disponible">Disponible</option>
+                <option value="Asignado">Asignado</option>
+                <option value="Mantenimiento">En Mantenimiento</option>
+                <option value="Dañado">Dañado</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Asignado a</label>
+              <input type="text" [(ngModel)]="newItem.asignadoA" placeholder="Nombre del usuario" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Departamento</label>
+              <select [(ngModel)]="newItem.departamento" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="">Seleccione departamento</option>
+                <option *ngFor="let dep of departamentoOptions" [value]="dep">{{dep}}</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Ubicación *</label>
+              <input type="text" [(ngModel)]="newItem.ubicacion" placeholder="Ej. Oficina 201" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Origen / Proveedor</label>
+              <input type="text" [(ngModel)]="newItem.source" placeholder="Ej. Donación, Compra" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
           </div>
-          <!-- Add the Asignado a field -->
+        </div>
+
+        <div class="mt-4 space-y-4">
           <div>
-            <label class="block text-sm font-medium text-slate-700">Asignado a</label>
-            <input type="text" [(ngModel)]="newItem.asignadoA" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md">
+            <label class="block text-sm font-semibold text-slate-700 mb-1">Descripción / Notas</label>
+            <textarea [(ngModel)]="newItem.description" rows="2" placeholder="Detalles adicionales del equipo..." class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
           </div>
+
           <div>
-            <label class="block text-sm font-medium text-slate-700">Modelo</label>
-            <input type="text" [(ngModel)]="newItem.modelo" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-700">Serial</label>
-            <input type="text" [(ngModel)]="newItem.serial" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-700">Estado</label>
-            <select [(ngModel)]="newItem.estado" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md">
-              <option value="Disponible">Disponible</option>
-              <option value="Asignado">Asignado</option>
-              <option value="Mantenimiento">En Mantenimiento</option>
-              <option value="Dañado">Dañado</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-700">Ubicación</label>
-            <input type="text" [(ngModel)]="newItem.ubicacion" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-700">Departamento</label>
-            <select [(ngModel)]="newItem.departamento" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md">
-              <option value="Desarrollo">Desarrollo</option>
-              <option value="TI">TI</option>
-              <option value="Contabilidad">Contabilidad</option>
-            </select>
-          </div>
-          <div>
-            <label for="imagen">Seleccionar Imagen:</label>
-            <input type="file" (change)="onFileSelected($event)">
+            <label class="block text-sm font-semibold text-slate-700 mb-1">Imagen del Equipo</label>
+            <div class="mt-1 flex items-center justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-md hover:border-blue-400 transition-colors">
+              <div class="space-y-1 text-center">
+                <i class="fas fa-image text-3xl text-slate-400 mb-2"></i>
+                <div class="flex text-sm text-slate-600">
+                  <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                    <span>Subir archivo</span>
+                    <input id="file-upload" name="file-upload" type="file" class="sr-only" (change)="onFileSelected($event)">
+                  </label>
+                  <p class="pl-1">o arrastrar y soltar</p>
+                </div>
+                <p class="text-xs text-slate-500">PNG, JPG hasta 10MB</p>
+                <p *ngIf="selectedFile" class="text-sm text-green-600 font-medium mt-2">
+                  <i class="fas fa-check-circle mr-1"></i> {{selectedFile.name}}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="p-4 border-t border-slate-200 flex justify-end space-x-3">
-        <button (click)="closeNewItemModal()" class="px-4 py-2 text-sm text-slate-600 hover:text-slate-800">
+
+      <div class="p-4 border-t border-slate-200 flex justify-end space-x-3 bg-slate-50 rounded-b-lg">
+        <button (click)="closeNewItemModal()" class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
           Cancelar
         </button>
-        <button (click)="saveNewItem()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          Guardar
+        <button (click)="saveNewItem()" 
+                [disabled]="isLoading"
+                class="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-md disabled:bg-slate-400">
+          <i *ngIf="isLoading" class="fas fa-spinner fa-spin mr-2"></i>
+          Guardar Equipo
         </button>
       </div>
     </div>
@@ -307,104 +389,241 @@
   </div>
 
   <!-- Modal de Edición -->
-  <div *ngIf="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
-      <div class="p-4 border-b border-slate-200">
-        <h3 class="text-lg font-medium">Editar Equipo</h3>
+  <div *ngIf="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col my-auto">
+      <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 rounded-t-lg">
+        <h3 class="text-lg font-bold text-slate-800">Editar Equipo</h3>
+        <button (click)="showEditModal = false" class="text-slate-400 hover:text-slate-600">
+          <i class="fas fa-times text-xl"></i>
+        </button>
       </div>
-      <div class="p-4">
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-slate-700">Tipo</label>
-            <input type="text" [(ngModel)]="editForm.tipo" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md">
+      
+      <div class="p-6 overflow-y-auto max-h-[70vh]">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Columna 1 -->
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Tipo</label>
+              <select [(ngModel)]="editForm.tipo" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+                <option *ngFor="let tipo of tipoOptions" [value]="tipo">{{tipo}}</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Marca</label>
+              <select [(ngModel)]="editForm.marca" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+                <option *ngFor="let marca of marcaOptions" [value]="marca">{{marca}}</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Modelo</label>
+              <input type="text" [(ngModel)]="editForm.modelo" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Serial</label>
+              <input type="text" [(ngModel)]="editForm.serial" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">No. Inventario</label>
+              <input type="text" [(ngModel)]="editForm.inventoryNumber" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-700">Marca</label>
-            <input type="text" [(ngModel)]="editForm.marca" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md">
+
+          <!-- Columna 2 -->
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Estado</label>
+              <select [(ngModel)]="editForm.estado" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="Disponible">Disponible</option>
+                <option value="Asignado">Asignado</option>
+                <option value="Mantenimiento">En Mantenimiento</option>
+                <option value="Dañado">Dañado</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Asignado a</label>
+              <input type="text" [(ngModel)]="editForm.asignadoA" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Departamento</label>
+              <select [(ngModel)]="editForm.departamento" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+                <option *ngFor="let dep of departamentoOptions" [value]="dep">{{dep}}</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Ubicación</label>
+              <input type="text" [(ngModel)]="editForm.ubicacion" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1">Origen / Proveedor</label>
+              <input type="text" [(ngModel)]="editForm.source" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
           </div>
+        </div>
+
+        <div class="mt-4 space-y-4">
           <div>
-            <label class="block text-sm font-medium text-slate-700">Modelo</label>
-            <input type="text" [(ngModel)]="editForm.modelo" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md">
+            <label class="block text-sm font-semibold text-slate-700 mb-1">Descripción / Notas</label>
+            <textarea [(ngModel)]="editForm.description" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
           </div>
+
           <div>
-            <label class="block text-sm font-medium text-slate-700">Estado</label>
-            <select [(ngModel)]="editForm.estado" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md">
-              <option value="Disponible">Disponible</option>
-              <option value="Asignado">Asignado</option>
-              <option value="Mantenimiento">En Mantenimiento</option>
-              <option value="Dañado">Dañado</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-700">Ubicación</label>
-            <input type="text" [(ngModel)]="editForm.ubicacion" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md">
-          </div>
-          <div>
-            <label for="editImagen">Actualizar Imagen:</label>
-            <input type="file" (change)="onFileSelected($event, true)">
+            <label class="block text-sm font-semibold text-slate-700 mb-1">Actualizar Imagen</label>
+            <div class="mt-1 flex items-center justify-center px-6 pt-4 pb-4 border-2 border-slate-300 border-dashed rounded-md hover:border-blue-400 transition-colors">
+              <div class="space-y-1 text-center">
+                <i class="fas fa-cloud-upload-alt text-2xl text-slate-400 mb-2"></i>
+                <div class="flex text-sm text-slate-600">
+                  <label for="edit-file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                    <span>Cambiar imagen</span>
+                    <input id="edit-file-upload" name="edit-file-upload" type="file" class="sr-only" (change)="onFileSelected($event, true)">
+                  </label>
+                </div>
+                <p *ngIf="selectedEditFile" class="text-sm text-green-600 font-medium mt-1">
+                  {{selectedEditFile.name}}
+                </p>
+                <p *ngIf="!selectedEditFile && editForm.imagen" class="text-xs text-slate-500 mt-1">
+                  Ya tiene una imagen asignada
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="p-4 border-t border-slate-200 flex justify-end space-x-3">
-        <button (click)="showEditModal = false" class="px-4 py-2 text-sm text-slate-600 hover:text-slate-800">
+
+      <div class="p-4 border-t border-slate-200 flex justify-end space-x-3 bg-slate-50 rounded-b-lg">
+        <button (click)="showEditModal = false" class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
           Cancelar
         </button>
-        <button (click)="saveChanges()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          Guardar cambios
+        <button (click)="saveChanges()" 
+                [disabled]="isLoading"
+                class="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-md disabled:bg-slate-400">
+          <i *ngIf="isLoading" class="fas fa-spinner fa-spin mr-2"></i>
+          Guardar Cambios
         </button>
       </div>
     </div>
   </div>
 
   <!-- Modal de Detalles -->
-<div *ngIf="showDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
-    <div class="p-4 border-b border-slate-200">
-      <h3 class="text-lg font-medium">Detalles del Equipo</h3>
-    </div>
-    <div class="p-4">
-      <div class="space-y-3" *ngIf="selectedItem">
-        
-        <!-- Mostrar imagen si existe -->
-        <div *ngIf="selectedItem.imagen" class="flex justify-center my-4">
-          <img [src]="selectedItem.imagen" alt="Imagen del equipo" class="w-40 h-40 object-cover rounded-lg shadow-md">
+  <div *ngIf="showDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl flex flex-col my-auto">
+      <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 rounded-t-lg">
+        <h3 class="text-lg font-bold text-slate-800">Detalles del Equipo</h3>
+        <button (click)="closeDetailsModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      
+      <div class="p-6 overflow-y-auto max-h-[75vh]" *ngIf="selectedItem">
+        <!-- Imagen y Título Principal -->
+        <div class="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
+          <div *ngIf="selectedItem.imagen" class="flex-shrink-0">
+            <img [src]="selectedItem.imagen" alt="Imagen del equipo" 
+                 class="w-48 h-48 object-cover rounded-xl shadow-lg border-2 border-white ring-1 ring-slate-200">
+          </div>
+          <div *ngIf="!selectedItem.imagen" class="w-48 h-48 bg-slate-100 rounded-xl flex items-center justify-center border-2 border-dashed border-slate-200">
+            <i class="fas fa-laptop text-4xl text-slate-300"></i>
+          </div>
+          
+          <div class="flex-1 text-center md:text-left">
+            <h4 class="text-2xl font-bold text-slate-800">{{selectedItem.marca}} {{selectedItem.modelo}}</h4>
+            <p class="text-slate-500 font-medium mb-3">{{selectedItem.tipo}}</p>
+            <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold"
+                 [ngClass]="{
+                   'bg-green-100 text-green-700': selectedItem.estado === 'Disponible',
+                   'bg-blue-100 text-blue-700': selectedItem.estado === 'Asignado',
+                   'bg-amber-100 text-amber-700': selectedItem.estado === 'Mantenimiento',
+                   'bg-red-100 text-red-700': selectedItem.estado === 'Dañado'
+                 }">
+              <span class="w-2 h-2 rounded-full mr-2"
+                    [ngClass]="{
+                      'bg-green-500': selectedItem.estado === 'Disponible',
+                      'bg-blue-500': selectedItem.estado === 'Asignado',
+                      'bg-amber-500': selectedItem.estado === 'Mantenimiento',
+                      'bg-red-500': selectedItem.estado === 'Dañado'
+                    }"></span>
+              {{selectedItem.estado}}
+            </div>
+          </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
-          <div class="text-sm font-medium text-slate-500">ID:</div>
-          <div class="text-sm">{{selectedItem.id}}</div>
+        <!-- Grid de Información -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+          <!-- Información Técnica -->
+          <div class="space-y-4">
+            <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-1">Info. Técnica</h5>
+            <div>
+              <p class="text-xs text-slate-500 mb-0.5">Número de Serial</p>
+              <p class="text-sm font-semibold text-slate-800 bg-slate-50 p-2 rounded border border-slate-100">{{selectedItem.serial}}</p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 mb-0.5">No. de Inventario</p>
+              <p class="text-sm font-semibold text-slate-800">{{selectedItem.inventoryNumber || 'N/A'}}</p>
+            </div>
+          </div>
 
-          <div class="text-sm font-medium text-slate-500">Tipo:</div>
-          <div class="text-sm">{{selectedItem.tipo}}</div>
+          <!-- Asignación -->
+          <div class="space-y-4">
+            <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-1">Asignación y Ubicación</h5>
+            <div>
+              <p class="text-xs text-slate-500 mb-0.5">Asignado a</p>
+              <p class="text-sm font-semibold text-slate-800">{{selectedItem.asignadoA || 'Sin asignar'}}</p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 mb-0.5">Ubicación / Área</p>
+              <p class="text-sm font-semibold text-slate-800">{{selectedItem.ubicacion}}</p>
+            </div>
+          </div>
 
-          <div class="text-sm font-medium text-slate-500">Marca:</div>
-          <div class="text-sm">{{selectedItem.marca}}</div>
+          <!-- Administrativo -->
+          <div class="space-y-4">
+            <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-1">Administrativo</h5>
+            <div>
+              <p class="text-xs text-slate-500 mb-0.5">Departamento</p>
+              <p class="text-sm font-semibold text-slate-800">{{selectedItem.departamento || 'N/A'}}</p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 mb-0.5">Origen / Proveedor</p>
+              <p class="text-sm font-semibold text-slate-800">{{selectedItem.source || 'N/A'}}</p>
+            </div>
+          </div>
 
-          <div class="text-sm font-medium text-slate-500">Modelo:</div>
-          <div class="text-sm">{{selectedItem.modelo}}</div>
+          <!-- Fechas -->
+          <div class="space-y-4">
+            <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-1">Fechas</h5>
+            <div>
+              <p class="text-xs text-slate-500 mb-0.5">Fecha de Registro</p>
+              <p class="text-sm font-semibold text-slate-800">{{selectedItem.fechaRegistro | date:'dd/MM/yyyy'}}</p>
+            </div>
+            <div *ngIf="selectedItem.ultimoMantenimiento">
+              <p class="text-xs text-slate-500 mb-0.5">Último Mantenimiento</p>
+              <p class="text-sm font-semibold text-slate-800">{{selectedItem.ultimoMantenimiento | date:'dd/MM/yyyy'}}</p>
+            </div>
+          </div>
+        </div>
 
-          <div class="text-sm font-medium text-slate-500">Serial:</div>
-          <div class="text-sm">{{selectedItem.serial}}</div>
-
-          <div class="text-sm font-medium text-slate-500">Estado:</div>
-          <div class="text-sm">{{selectedItem.estado}}</div>
-
-          <div class="text-sm font-medium text-slate-500">Ubicación:</div>
-          <div class="text-sm">{{selectedItem.ubicacion}}</div>
-
-          <div class="text-sm font-medium text-slate-500">Departamento:</div>
-          <div class="text-sm">{{selectedItem.departamento}}</div>
-
-          <div class="text-sm font-medium text-slate-500">Fecha de registro:</div>
-          <div class="text-sm">{{selectedItem.fechaRegistro}}</div>
+        <!-- Descripción Completa -->
+        <div class="mt-8 pt-6 border-t border-slate-100">
+          <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Descripción y Notas Adicionales</h5>
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-600 leading-relaxed min-h-[80px]">
+            {{selectedItem.description || 'No hay descripción detallada para este equipo.'}}
+          </div>
         </div>
       </div>
-    </div>
-    <div class="p-4 border-t border-slate-200 flex justify-end">
-      <button (click)="closeDetailsModal()" class="px-4 py-2 text-sm text-slate-600 hover:text-slate-800">
-        Cerrar
-      </button>
+
+      <div class="p-4 border-t border-slate-200 flex justify-end bg-slate-50 rounded-b-lg">
+        <button (click)="closeDetailsModal()" 
+                class="px-6 py-2 bg-slate-800 text-white text-sm font-bold rounded-lg hover:bg-slate-900 transition-colors shadow-lg">
+          Cerrar
+        </button>
+      </div>
     </div>
   </div>
-</div>
 

@@ -17,14 +17,14 @@ export class InventoryListComponent implements OnInit {
   marcaOptions: string[] = ['HP', 'Dell', 'Acer', 'Asus', 'Brother', 'Epson', 'Canon', 'Samsung', 'LG', 'APC', 'Cyberpower'];
   departamentoOptions: string[] = ['TI', 'Ventas', 'Contabilidad', 'RRHH', 'Operaciones'];
   estadoOptions: string[] = ['Disponible', 'Asignado', 'Mantenimiento', 'Dañado'];
-  
+
   // Filtros de búsqueda
   searchTerm: string = '';
   selectedFilter: string = 'todos';
   selectedDepartamento: string = 'todos';
   fechaDesde: string = '';
   fechaHasta: string = '';
-  
+
   // Estados de UI
   showNewItemModal: boolean = false;
   showDeleteModal: boolean = false;
@@ -40,7 +40,7 @@ export class InventoryListComponent implements OnInit {
   selectedItem?: InventoryItem;
   newItem: Partial<InventoryItemFormData> = {};
   editForm: Partial<InventoryItemFormData> = {};
-  
+
   // Imagen seleccionada para nuevo item o edición
   selectedFile: File | null = null;
   selectedEditFile: File | null = null;
@@ -52,7 +52,7 @@ export class InventoryListComponent implements OnInit {
 
   constructor(
     private inventoryService: InventoryService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadInventory();
@@ -92,7 +92,7 @@ export class InventoryListComponent implements OnInit {
 
   async saveNewItem(): Promise<void> {
     if (!this.validateNewItem()) return;
-    
+
     this.isLoading = true;
     try {
       // Ensure proper typing
@@ -101,15 +101,19 @@ export class InventoryListComponent implements OnInit {
         marca: this.newItem.marca!,
         modelo: this.newItem.modelo!,
         serial: this.newItem.serial!,
+        inventoryNumber: this.newItem.inventoryNumber,
+        description: this.newItem.description,
+        source: this.newItem.source,
         estado: this.newItem.estado! as 'Disponible' | 'Asignado' | 'Mantenimiento' | 'Dañado',
         ubicacion: this.newItem.ubicacion!,
         fechaRegistro: this.newItem.fechaRegistro || new Date().toISOString().split('T')[0],
         asignadoA: this.newItem.asignadoA,
+        assignedSubArea: this.newItem.assignedSubArea,
         ultimoMantenimiento: this.newItem.ultimoMantenimiento,
         departamento: this.newItem.departamento as any,
         imagen: this.selectedFile || undefined
       };
-      
+
       const createdItem = await this.inventoryService.createInventoryItem(itemToCreate);
       this.inventoryItems.unshift(createdItem); // Add to beginning of array
       this.closeNewItemModal();
@@ -124,7 +128,7 @@ export class InventoryListComponent implements OnInit {
 
   async deleteItem(): Promise<void> {
     if (!this.itemToDelete?.id) return;
-    
+
     this.isLoading = true;
     try {
       await this.inventoryService.deleteInventoryItem(this.itemToDelete.id);
@@ -144,7 +148,7 @@ export class InventoryListComponent implements OnInit {
 
   async saveChanges(): Promise<void> {
     if (!this.itemToEdit?.id || !this.editForm) return;
-    
+
     this.isLoading = true;
     try {
       // Ensure proper typing for update
@@ -153,25 +157,29 @@ export class InventoryListComponent implements OnInit {
         marca: this.editForm.marca!,
         modelo: this.editForm.modelo!,
         serial: this.editForm.serial!,
+        inventoryNumber: this.editForm.inventoryNumber,
+        description: this.editForm.description,
+        source: this.editForm.source,
         estado: this.editForm.estado! as 'Disponible' | 'Asignado' | 'Mantenimiento' | 'Dañado',
         ubicacion: this.editForm.ubicacion!,
         fechaRegistro: this.editForm.fechaRegistro!,
         asignadoA: this.editForm.asignadoA,
+        assignedSubArea: this.editForm.assignedSubArea,
         ultimoMantenimiento: this.editForm.ultimoMantenimiento,
         departamento: this.editForm.departamento as any,
         imagen: this.selectedEditFile || undefined
       };
-      
+
       const updatedItem = await this.inventoryService.updateInventoryItem(
         this.itemToEdit.id,
         itemToUpdate
       );
-      
+
       const index = this.inventoryItems.findIndex(item => item.id === updatedItem.id);
       if (index !== -1) {
         this.inventoryItems[index] = updatedItem;
       }
-      
+
       this.showEditModal = false;
       this.itemToEdit = undefined;
       this.editForm = {};
@@ -182,6 +190,21 @@ export class InventoryListComponent implements OnInit {
       console.error(error);
     } finally {
       this.isLoading = false;
+    }
+  }
+
+  getStatusClass(status: string): string {
+    switch (status?.toLowerCase()) {
+      case 'disponible':
+        return 'bg-green-100 text-green-800 border border-green-200';
+      case 'asignado':
+        return 'bg-blue-100 text-blue-800 border border-blue-200';
+      case 'mantenimiento':
+        return 'bg-amber-100 text-amber-800 border border-amber-200';
+      case 'dañado':
+        return 'bg-red-100 text-red-800 border border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border border-gray-200';
     }
   }
 
@@ -248,11 +271,11 @@ export class InventoryListComponent implements OnInit {
     const required: (keyof InventoryItemFormData)[] = [
       'tipo', 'marca', 'modelo', 'serial', 'estado', 'ubicacion'
     ];
-    const isValid = required.every(field => 
-      this.newItem[field] !== undefined && 
+    const isValid = required.every(field =>
+      this.newItem[field] !== undefined &&
       this.newItem[field] !== ''
     );
-    
+
     if (!isValid) {
       this.errorMessage = 'Por favor complete todos los campos requeridos';
     }
@@ -273,9 +296,20 @@ export class InventoryListComponent implements OnInit {
   }
 
   // Export to Excel method (mock for now)
-  exportToExcel(): void {
-    console.log('Exportando datos:', this.inventoryItems);
-    // Implementación real requeriría una librería como ExcelJS
+  async exportToExcel(): Promise<void> {
+    this.isLoading = true;
+    try {
+      await this.inventoryService.exportInventory({
+        searchTerm: this.searchTerm,
+        estado: this.selectedFilter,
+        departamento: this.selectedDepartamento
+      });
+    } catch (error) {
+      this.errorMessage = 'Error al exportar los datos';
+      console.error(error);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   resetFilters(): void {
@@ -291,7 +325,7 @@ export class InventoryListComponent implements OnInit {
     this.selectedItem = item;
     this.showDetailsModal = true;
   }
-  
+
   closeDetailsModal(): void {
     this.showDetailsModal = false;
     this.selectedItem = undefined;

@@ -1,0 +1,13 @@
+:host {
+  display: block;
+  background-color: #f8fafc; /* slate-50 */
+  min-height: 100vh;
+}
+
+// Estilos personalizados para las tarjetas si Tailwind no cubre algo específico
+.card-hover-effect {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  &:hover {
+    transform: translateY(-4px);
+  }
+}

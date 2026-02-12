@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import axios, { AxiosResponse } from 'axios';
 import { InventoryItem, InventoryItemFormData } from '../models/inventory-item.model';
+import { MaintenanceReport } from '../models/maintenance-report.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -9,8 +10,7 @@ import { environment } from '../../environments/environment';
 export class InventoryService {
   private apiUrl = `${environment.apiUrl}/inventory`;
 
-  constructor() 
-  {
+  constructor() {
     // Configuración global de Axios
     axios.defaults.baseURL = environment.apiUrl;
     axios.defaults.headers.post['Content-Type'] = 'multipart/form-data';
@@ -97,6 +97,33 @@ export class InventoryService {
     }
   }
 
+  // Exportar a Excel
+  async exportInventory(filters: any): Promise<void> {
+    try {
+      const params = new URLSearchParams();
+      if (filters.searchTerm) params.append('searchTerm', filters.searchTerm);
+      if (filters.estado && filters.estado !== 'todos') params.append('estado', filters.estado);
+      if (filters.departamento && filters.departamento !== 'todos') params.append('departamento', filters.departamento);
+
+      const response = await axios.get(`${environment.apiUrl}/export/excel`, {
+        params,
+        responseType: 'blob'
+      });
+
+      // Crear un link para descargar el archivo
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'Inventario.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      this.handleError(error);
+      throw error;
+    }
+  }
+
   // Métodos auxiliares
   private createFormData(itemData: InventoryItemFormData): FormData {
     const formData = new FormData();
@@ -106,6 +133,49 @@ export class InventoryService {
       }
     });
     return formData;
+  }
+
+  // Mantenimiento
+  async getMaintenanceReports(itemId: string): Promise<MaintenanceReport[]> {
+    try {
+      const response = await axios.get(`${environment.apiUrl}/maintenance/item/${itemId}`);
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  async createMaintenanceReport(report: MaintenanceReport): Promise<MaintenanceReport> {
+    try {
+      // Usar JSON para el reporte
+      const response = await axios.post(`${environment.apiUrl}/maintenance`, report, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  async downloadMaintenancePDF(itemId: string): Promise<void> {
+    try {
+      const response = await axios.get(`${environment.apiUrl}/maintenance/pdf/${itemId}`, {
+        responseType: 'blob'
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Reporte_Mantenimiento_${itemId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      this.handleError(error);
+      throw error;
+    }
   }
 
   private handleError(error: any): void {

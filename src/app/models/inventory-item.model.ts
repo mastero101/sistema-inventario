@@ -24,8 +24,12 @@ export interface InventoryItemFormData {
   marca: string;
   modelo: string;
   serial: string;
+  inventoryNumber?: string;
+  source?: string;
+  description?: string;
   estado: 'Disponible' | 'Asignado' | 'Mantenimiento' | 'Dañado';
   asignadoA?: string;
+  assignedSubArea?: string;
   ubicacion: string;
   fechaRegistro: string;
   ultimoMantenimiento?: string;

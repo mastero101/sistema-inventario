@@ -13,6 +13,18 @@ export const routes: Routes = [
     title: 'Dashboard - Inventario Hospital'
   },
   {
+    path: 'equipos',
+    loadComponent: () => import('./components/equipos/equipos.component')
+      .then(m => m.EquiposComponent),
+    title: 'Gestión de Equipos'
+  },
+  {
+    path: 'mantenimiento',
+    loadComponent: () => import('./components/mantenimiento/mantenimiento.component')
+      .then(m => m.MantenimientoComponent),
+    title: 'Gestión de Mantenimiento'
+  },
+  {
     path: 'inventoryPaginated',
     loadComponent: () => import('./components/inventory/inventory-paginated/inventory-paginated.component')
       .then(m => m.InventoryPaginatedComponent),

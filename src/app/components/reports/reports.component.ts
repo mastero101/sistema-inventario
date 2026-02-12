@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { InventoryService } from '../../services/inventory.service';
 
 interface InventoryItem {
   id: string;
@@ -42,7 +43,7 @@ interface Report {
 })
 export class ReportsComponent implements OnInit {
   reports: Report[] = [];
-  
+
   // Filtros
   filterCriteria = {
     tipo: '',
@@ -56,28 +57,46 @@ export class ReportsComponent implements OnInit {
   currentPage: number = 1;
 
   selectedReport: Report | null = null;
+  isLoading: boolean = false;
+
+  constructor(private inventoryService: InventoryService) { }
 
   ngOnInit() {
     this.loadReports();
   }
 
   // Acciones de Reportes
-  generateReport(): void {
-    const newReport: Report = {
-      id: `REP${String(this.reports.length + 1).padStart(3, '0')}`,
-      tipo: this.filterCriteria.tipo || 'Reporte General',
-      fechaGeneracion: new Date().toISOString().split('T')[0],
-      generadoPor: 'Admin',
-      estado: 'Generado',
-      formatoArchivo: 'PDF',
-      periodo: {
-        inicio: this.filterCriteria.fechaInicio || new Date().toISOString().split('T')[0],
-        fin: this.filterCriteria.fechaFin || new Date().toISOString().split('T')[0]
-      }
-    };
+  async generateReport(): Promise<void> {
+    try {
+      this.isLoading = true;
 
-    this.reports.unshift(newReport);
-    alert('Reporte generado exitosamente');
+      // Llamar al servicio real de exportación
+      await this.inventoryService.exportInventory({
+        searchTerm: '', // Podrías añadir un campo de búsqueda en el componente de reportes si fuera necesario
+        estado: this.filterCriteria.estado,
+        departamento: this.filterCriteria.tipo // Usando 'tipo' como departamento para este ejemplo o ajustando los campos
+      });
+
+      const newReport: Report = {
+        id: `REP${String(this.reports.length + 1).padStart(3, '0')}`,
+        tipo: this.filterCriteria.tipo || 'Reporte General',
+        fechaGeneracion: new Date().toISOString().split('T')[0],
+        generadoPor: 'Admin',
+        estado: 'Generado',
+        formatoArchivo: 'Excel',
+        periodo: {
+          inicio: this.filterCriteria.fechaInicio || new Date().toISOString().split('T')[0],
+          fin: this.filterCriteria.fechaFin || new Date().toISOString().split('T')[0]
+        }
+      };
+
+      this.reports.unshift(newReport);
+    } catch (error) {
+      console.error('Error generating report:', error);
+      alert('Error al generar el reporte');
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   downloadReport(report: Report): void {
